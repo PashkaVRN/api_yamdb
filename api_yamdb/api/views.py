@@ -1,7 +1,9 @@
+
 from django.shortcuts import get_object_or_404
 from reviews.models import Comment, Review
 from rest_framework import viewsets
-from .serializers import (CommentSerializer, ReviewSerializer)
+from rest_framework.views import APIView
+from .serializers import (CommentSerializer, ReviewSerializer, SignUpSerializer)
 
 
 class ReviewViewSet(viewsets.ModelViewSet):
@@ -28,3 +30,13 @@ class CommentViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         review = get_object_or_404(Review, id=self.kwargs.get('review_id'))
         serializer.save(author=self.request.user, review=review)
+
+class SignUpView(APIView):
+    """
+    Запрос создания нового пользователя.
+    Отправка на email кода подтверждения региcтрации.
+    """
+    def post(self, request):
+        serializer = SignUpSerializer(data=request.data)
+
+

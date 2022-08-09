@@ -1,9 +1,15 @@
 from django.shortcuts import get_object_or_404
-from reviews.models import Comment, Review
+
 from rest_framework import viewsets
 from rest_framework.views import APIView
 from rest_framework.pagination import LimitOffsetPagination
+from rest_framework.pagination import PageNumberPagination
+from .mixins import MixinSet
+from .serializers import (CategorySerializer, GenreSerializer,
+                          TitleGetSerializer, TitlePostSerializer)
 from .serializers import (CommentSerializer, ReviewSerializer, SignUpSerializer)
+
+from reviews.models import Category, Genre, Review, Title
 
 
 class ReviewViewSet(viewsets.ModelViewSet):
@@ -11,33 +17,34 @@ class ReviewViewSet(viewsets.ModelViewSet):
     #permission_classes = () разрешения
     pagination_class = LimitOffsetPagination
 
-    def get_queryset(self):
-        title = get_object_or_404(Title, id=self.kwargs.get('title_id'))
-        return title.reviews.all()
 
-    def perform_create(self, serializer):
-        title = get_object_or_404(Title, id=self.kwargs.get('title_id'))
-        serializer.save(author=self.request.user, title=title)
+class CategoryViewSet(MixinSet):
+    queryset = Category.objects.all()
+    serializer_class = CategorySerializer
+    #permission_classes = (IsAdminOrReadOnly, )
+    pagination_class = PageNumberPagination
+    search_fields = ('=name', )
+    lookup_field = 'slug'
 
 
-class CommentViewSet(viewsets.ModelViewSet):
-    serializer_class = CommentSerializer
-    # permission_classes = () разрешения
+class GenreViewSet(MixinSet):
+    queryset = Genre.objects.all()
+    serializer_class = GenreSerializer
+    #permission_classes = (IsAdminOrReadOnly, )
+    pagination_class = PageNumberPagination
+    search_fields = ('=name', )
+    lookup_field = 'slug'
 
-    def get_queryset(self):
-        review = get_object_or_404(Review, id=self.kwargs.get('review_id'))
-        return review.comments.all()
 
-    def perform_create(self, serializer):
-        review = get_object_or_404(Review, id=self.kwargs.get('review_id'))
-        serializer.save(author=self.request.user, review=review)
+class TitleViewSet(viewsets.ModelViewSet):
+    queryset = Title.objects.all()
+    #permission_classes = (IsAdminOrReadOnly, )
+    pagination_class = PageNumberPagination
 
-class SignUpView(APIView):
-    """
-    Запрос создания нового пользователя.
-    Отправка на email кода подтверждения региcтрации.
-    """
-    def post(self, request):
-        serializer = SignUpSerializer(data=request.data)
+    def get_serializer_class(self):
+        if self.action in ('create', 'partial_update'):
+            return TitlePostSerializer
+        return TitleGetSerializer
+
 
 

@@ -2,8 +2,8 @@ from django.shortcuts import get_object_or_404
 
 from rest_framework import viewsets
 from rest_framework.views import APIView
+from rest_framework.pagination import LimitOffsetPagination
 from rest_framework.pagination import PageNumberPagination
-
 from .mixins import MixinSet
 from .serializers import (CategorySerializer, GenreSerializer,
                           TitleGetSerializer, TitlePostSerializer)
@@ -11,6 +11,11 @@ from .serializers import (CommentSerializer, ReviewSerializer, SignUpSerializer)
 
 from reviews.models import Category, Genre, Review, Title
 
+
+class ReviewViewSet(viewsets.ModelViewSet):
+    serializer_class = ReviewSerializer
+    #permission_classes = () разрешения
+    pagination_class = LimitOffsetPagination
 
 
 class CategoryViewSet(MixinSet):

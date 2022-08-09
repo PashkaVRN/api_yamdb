@@ -5,7 +5,6 @@ from .validators import current_year
 
 User = get_user_model()
 
-
 class Category(models.Model):
     name = models.TextField(
         'Название категории',
@@ -118,5 +117,3 @@ class Comment(models.Model):
 
     def __str__(self):
         return self.text
-
-

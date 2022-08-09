@@ -1,8 +1,33 @@
+
 from django.contrib.auth import get_user_model
+from rest_framework import serializers
+
+from reviews.models import Review, Comment
 from rest_framework.serializers import (CharField, EmailField, Serializer,
                                         ValidationError)
-
 User = get_user_model()
+
+class CommentSerializer(serializers.ModelSerializer):
+    author = serializers.SlugRelatedField(
+        read_only=True,
+        slug_field='username'
+    )
+
+    class Meta:
+        fields = '__all__'
+        model = Comment
+
+
+class ReviewSerializer(serializers.ModelSerializer):
+    author = serializers.SlugRelatedField(
+        read_only=True,
+        slug_field='username',
+        default=serializers.CurrentUserDefault()
+    )
+
+    class Meta:
+        fields = '__all__'
+        model = Review
 
 
 class SignUpSerializer(Serializer):
@@ -34,3 +59,4 @@ class GetJWTTokenSerializer(Serializer):
     """Сериализатор запроса JWT токена."""
     username = CharField(max_length=150)
     confirmation_code = CharField()
+

@@ -3,7 +3,6 @@ from django.db import models
 
 User = get_user_model()
 
-
 class Review(models.Model):
     text = models.TextField()
     author = models.ForeignKey(

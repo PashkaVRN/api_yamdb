@@ -1,5 +1,6 @@
 from django.contrib.auth.models import AbstractUser
-from django.db.models import CharField, EmailField, TextField
+from django.db.models import (CharField, CheckConstraint, EmailField, Q,
+                              TextField)
 
 
 class User(AbstractUser):
@@ -8,7 +9,6 @@ class User(AbstractUser):
     Дополнительные поля биографии и ролей.
     Возможные роли: юзер, модератор, админ.
     Новым пользователям по умолчанию присваивается роль юзер.
-    Определяет права редактирования контента для разных ролей.
     """
     USER_ROLE = 'user'
     MODERATOR_ROLE = 'moderator'
@@ -34,3 +34,11 @@ class User(AbstractUser):
         verbose_name='Пользовательская роль',
         help_text='Выберите роль пользователя'
     )
+
+    class Meta:
+        constraints = [
+            CheckConstraint(
+                check=(~Q(username='me')),
+                name='not_me_username'
+            ),
+        ]

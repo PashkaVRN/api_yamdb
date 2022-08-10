@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib.auth import get_user_model
+from django.core.validators import MaxValueValidator, MinValueValidator
 
 from .validators import current_year
 
@@ -82,10 +83,16 @@ class Review(models.Model):
         on_delete=models.CASCADE,
         related_name='reviews'
     )
-    scope = models.IntegerField()
+    scope = models.IntegerField(
+        'Оценка произведения',
+        validators=[
+            MinValueValidator(1, message='Оценка должна быть не меньше 1.'),
+            MaxValueValidator(10, message='Оценка должна быть не больше 10.')
+        ],
+    )
     pub_date = models.DateTimeField(auto_now_add=True)
     titles = models.ForeignKey(
-        Titles,
+        Title,
         on_delete=models.CASCADE,
         related_name='reviews'
     )

@@ -35,16 +35,15 @@ class TitleGetSerializer(serializers.ModelSerializer):
 
 
 class CommentSerializer(serializers.ModelSerializer):
+    '''Сериалайзер комментариев.'''
     author = serializers.SlugRelatedField(
         read_only=True,
         slug_field='username'
-
     )
 
     class Meta:
         fields = '__all__'
-
-        model = Title
+        model = Comment
 
 
 class TitlePostSerializer(serializers.ModelSerializer):
@@ -56,24 +55,31 @@ class TitlePostSerializer(serializers.ModelSerializer):
     category = serializers.SlugRelatedField(
         slug_field='slug',
         queryset=Category.objects.all(),
-
         model=Comment
     )
 
 
 class ReviewSerializer(serializers.ModelSerializer):
+    '''Сериалайзер рецензий.'''
     author = serializers.SlugRelatedField(
         read_only=True,
         slug_field='username',
         default=serializers.CurrentUserDefault()
-
     )
+
+    def validate(self, data): 
+        title_id = self.context['view'].kwargs.get('title_id') 
+        user = self.context['request'].user 
+        is_review_exists = Review.objects.filter( 
+            title=title_id, 
+            author=user 
+        ).exists() 
+        if self.context['request'].method == 'POST' and is_review_exists: 
+            raise serializers.ValidationError('Повторный отзыв невозможен') 
+        return data 
 
     class Meta:
         fields = '__all__'
-
-        model = Title
-
         model = Review
 
 

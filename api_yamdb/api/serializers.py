@@ -21,7 +21,7 @@ class GenreSerializer(serializers.ModelSerializer):
         model = Genre
 
 
-class TitleGetSerializer(serializers.ModelSerializer):
+class TitleSerializer(serializers.ModelSerializer):
     genre = serializers.SlugRelatedField(
         read_only=True,
         slug_field="slug",
@@ -47,7 +47,7 @@ class CommentSerializer(serializers.ModelSerializer):
         model = Title
 
 
-class TitlePostSerializer(serializers.ModelSerializer):
+class TitleCreateSerializer(serializers.ModelSerializer):
     genre = serializers.SlugRelatedField(
         slug_field='slug',
         many=True,

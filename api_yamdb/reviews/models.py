@@ -6,6 +6,7 @@ from .validators import current_year
 
 User = get_user_model()
 
+
 class Category(models.Model):
     name = models.TextField(
         'Название категории',

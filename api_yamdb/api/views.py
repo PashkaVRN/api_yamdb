@@ -47,8 +47,6 @@ class GenreViewSet(MixinSet):
             return self.request.method == 'POST' or 'DELETE'
         return super().get_permissions()
 
-    permissions.AllowAny
-
 
 class TitleViewSet(viewsets.ModelViewSet):
     """Класс произведения, доступно только админу."""

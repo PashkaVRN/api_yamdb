@@ -34,6 +34,10 @@ class User(AbstractUser):
         verbose_name='Пользовательская роль',
         help_text='Выберите роль пользователя'
     )
+    confirmation_code = CharField(
+        max_length=100,
+        blank=True
+    )
 
     class Meta:
         constraints = [

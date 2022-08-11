@@ -137,3 +137,6 @@ class TitleViewSet(viewsets.ModelViewSet):
         if request.user.is_superuser or request.user.role == 'Admin':
             return self.request.method == 'POST' or 'DELETE'
         return super().get_permissions()
+        if self.action in ('create', 'partial_update'):
+            return TitlePostSerializer
+        return TitleGetSerializer

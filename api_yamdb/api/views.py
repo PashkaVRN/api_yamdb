@@ -1,15 +1,20 @@
 from random import randint
 
+from rest_framework import viewsets, request
+
+
 from django.shortcuts import get_object_or_404
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_exempt
 from rest_framework import viewsets
 from rest_framework.pagination import LimitOffsetPagination
+
 from rest_framework.response import Response
 from rest_framework.status import HTTP_200_OK, HTTP_400_BAD_REQUEST
 from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import RefreshToken
 from users.models import User
+
 
 from .mixins import MixinSet
 from .serializers import (CategorySerializer, CommentSerializer,
@@ -96,38 +101,31 @@ class CommentViewSet(viewsets.ModelViewSet):
 class CategoryViewSet(MixinSet):
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
-    #permission_classes = (IsAdminOrReadOnly, )
     pagination_class = LimitOffsetPagination
     search_fields = ('=name', )
     lookup_field = 'slug'
 
     def get_permissions(self):
-        if self.request.method == 'POST':
-            self.permission_classes = (Admin, )
-        elif self.request.method == 'DELETE':
-            self.permission_classes = (Admin, )
+        if request.user.is_superuser or request.user.role == 'Admin':
+            return self.request.method == 'POST' or 'DELETE'
         return super().get_permissions()
 
 
 class GenreViewSet(MixinSet):
     queryset = Genre.objects.all()
     serializer_class = GenreSerializer
-    #permission_classes = (IsAdminOrReadOnly, )
     pagination_class = LimitOffsetPagination
     search_fields = ('=name', )
     lookup_field = 'slug'
 
     def get_permissions(self):
-        if self.request.method == 'POST':
-            self.permission_classes = (Admin, )
-        elif self.request.method == 'DELETE':
-            self.permission_classes = (Admin, )
+        if request.user.is_superuser or request.user.role == 'Admin':
+            return self.request.method == 'POST' or 'DELETE'
         return super().get_permissions()
 
 
 class TitleViewSet(viewsets.ModelViewSet):
     queryset = Title.objects.all()
-    #permission_classes = (IsAdminOrReadOnly, )
     pagination_class = LimitOffsetPagination
 
     def get_serializer_class(self):
@@ -136,8 +134,6 @@ class TitleViewSet(viewsets.ModelViewSet):
         return TitleSerializer
 
     def get_permissions(self):
-        if self.request.method == 'POST':
-            self.permission_classes = (Admin, )
-        elif self.request.method == 'DELETE':
-            self.permission_classes = (Admin, )
+        if request.user.is_superuser or request.user.role == 'Admin':
+            return self.request.method == 'POST' or 'DELETE'
         return super().get_permissions()

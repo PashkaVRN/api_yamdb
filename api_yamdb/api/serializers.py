@@ -1,15 +1,12 @@
 from django.contrib.auth import get_user_model
 from rest_framework import serializers
-
-from reviews.models import Review, Comment
-from reviews.models import Category, Genre, Title
-from rest_framework.serializers import (CharField, EmailField, Serializer,
-                                        ValidationError)
+from reviews.models import Category, Comment, Genre, Review, Title
 
 User = get_user_model()
 
 
 class CategorySerializer(serializers.ModelSerializer):
+    """Сериализатор модели Category."""
     class Meta:
         fields = ('name', 'slug',)
         model = Category
@@ -21,7 +18,7 @@ class GenreSerializer(serializers.ModelSerializer):
         model = Genre
 
 
-class TitleGetSerializer(serializers.ModelSerializer):
+class TitleSerializer(serializers.ModelSerializer):
     genre = serializers.SlugRelatedField(
         read_only=True,
         slug_field="slug",
@@ -46,7 +43,7 @@ class CommentSerializer(serializers.ModelSerializer):
         model = Comment
 
 
-class TitlePostSerializer(serializers.ModelSerializer):
+class TitleCreateSerializer(serializers.ModelSerializer):
     genre = serializers.SlugRelatedField(
         slug_field='slug',
         many=True,
@@ -67,48 +64,63 @@ class ReviewSerializer(serializers.ModelSerializer):
         default=serializers.CurrentUserDefault()
     )
 
-    def validate(self, data): 
-        title_id = self.context['view'].kwargs.get('title_id') 
-        user = self.context['request'].user 
-        is_review_exists = Review.objects.filter( 
-            title=title_id, 
-            author=user 
-        ).exists() 
-        if self.context['request'].method == 'POST' and is_review_exists: 
-            raise serializers.ValidationError('Повторный отзыв невозможен') 
-        return data 
+    def validate(self, data):
+        title_id = self.context['view'].kwargs.get('title_id')
+        user = self.context['request'].user
+        is_review_exists = Review.objects.filter(
+            title=title_id,
+            author=user
+        ).exists()
+        if self.context['request'].method == 'POST' and is_review_exists:
+            raise serializers.ValidationError('Повторный отзыв невозможен')
+        return data
 
     class Meta:
         fields = '__all__'
         model = Review
 
 
-class SignUpSerializer(Serializer):
-    """Сериализатор запроса регистрации нового пользователя."""
-    email = EmailField(max_length=254)
-    username = CharField(max_length=150)
+class UserSerializer(serializers.ModelSerializer):
+    """Сериализатор модели User."""
+    class Meta:
+        model = User
+        fields = ('username', 'email', 'first_name',
+                  'last_name', 'bio', 'role')
 
     def validate_username(self, value):
         """Проверяет, что 'me' не используется как username."""
         if value == 'me':
-            raise ValidationError(
-                'Нельзя использовать "me" в качестве имени пользователя'
-            )
-        return value
-
-    def validate_email(self, value):
-        """
-        Проверяет, что email не используется
-        другими зарегестрированными пользователями.
-        """
-        if User.objects.filter(email=value).exists():
-            raise ValidationError(
-                f'Email {value} уже использется'
+            raise serializers.ValidationError(
+                'Нельзя использовать me в качестве имени пользователя'
             )
         return value
 
 
-class GetJWTTokenSerializer(Serializer):
+class SignUpSerializer(UserSerializer):
+    """Сериализатор запроса регистрации нового пользователя."""
+    class Meta:
+        model = User
+        fields = ('username', 'email')
+
+
+class GetJWTTokenSerializer(serializers.Serializer):
     """Сериализатор запроса JWT токена."""
-    username = CharField(max_length=150)
-    confirmation_code = CharField()
+    username = serializers.CharField(max_length=150)
+    confirmation_code = serializers.CharField()
+
+    def validate_confirmation_code(self, value):
+        """
+        Проверяет, что в запросе используется
+        корректный код подтверждения.
+        """
+        username = self.initial_data.get('username')
+
+        if (User.objects.get(
+                username=username
+        ).confirmation_code != value):
+            raise serializers.ValidationError(
+                'Неверный код подтверждения. '
+                'Для получения кода подтверждения отправте post запрос '
+                'на /api/v1/auth/signup/ c именем пользователя и email.'
+            )
+        return value

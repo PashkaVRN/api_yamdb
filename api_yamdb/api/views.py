@@ -28,7 +28,7 @@ class CategoryViewSet(MixinSet):
     lookup_field = 'slug'
 
     def get_permissions(self):
-        if request.user.is_superuser or request.user.role == 'Admin':
+        if request.user.is_superuser or request.user.role == 'admin':
             return self.request.method == 'POST' or 'DELETE'
         return super().get_permissions()
 
@@ -43,9 +43,11 @@ class GenreViewSet(MixinSet):
     lookup_field = 'slug'
 
     def get_permissions(self):
-        if request.user.is_superuser or request.user.role == 'Admin':
+        if request.user.is_superuser or request.user.role == 'admin':
             return self.request.method == 'POST' or 'DELETE'
         return super().get_permissions()
+
+    permissions.AllowAny
 
 
 class TitleViewSet(viewsets.ModelViewSet):
@@ -60,6 +62,6 @@ class TitleViewSet(viewsets.ModelViewSet):
         return TitleSerializer
 
     def get_permissions(self):
-        if request.user.is_superuser or request.user.role == 'Admin':
+        if request.user.is_superuser or request.user.role == 'admin':
             return self.request.method == 'POST' or 'DELETE'
         return super().get_permissions()

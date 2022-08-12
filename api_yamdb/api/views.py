@@ -11,7 +11,6 @@ from rest_framework.status import HTTP_200_OK, HTTP_400_BAD_REQUEST
 from rest_framework.views import APIView
 from rest_framework.viewsets import ModelViewSet
 from rest_framework_simplejwt.tokens import RefreshToken
-from random import randint
 from reviews.models import Category, Genre, Review, Title, User
 from .permissions import IsAdmin
 from .serializers import (CategorySerializer, CommentSerializer,
@@ -22,6 +21,8 @@ from .utils import get_confirmation_code, send_confirmation_code
 from users.models import User
 from .mixins import MixinSet
 from .utils import send_confirmation_code
+from .permissions import (IsAuthorOrReadOnly, IsAdmin, IsSelf,
+                          IsAdminOrReadOnly, IsModeratorAdminOrReadOnly)
 
 
 class SignUpView(APIView):
@@ -116,6 +117,7 @@ class ReviewViewSet(viewsets.ModelViewSet):
     """Просмотр и редактирование рецензий."""
     serializer_class = ReviewSerializer
     pagination_class = LimitOffsetPagination
+    permission_classes = [IsAuthorOrReadOnly, IsModeratorAdminOrReadOnly]
 
     def get_queryset(self):
         title = get_object_or_404(Title, pk=self.kwargs.get("title_id"))
@@ -131,6 +133,8 @@ class CommentViewSet(viewsets.ModelViewSet):
     """Просмотр и редактирование комментариев."""
     serializer_class = CommentSerializer
     pagination_class = LimitOffsetPagination
+    permission_classes = [
+        IsAuthorOrReadOnly, IsModeratorAdminOrReadOnly, IsAdminOrReadOnly]
 
     def get_queryset(self):
         review = get_object_or_404(Review, pk=self.kwargs.get("review_id"))

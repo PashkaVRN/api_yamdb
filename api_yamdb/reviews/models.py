@@ -2,8 +2,6 @@ from django.db import models
 from django.contrib.auth import get_user_model
 from django.core.validators import MaxValueValidator, MinValueValidator
 
-from .validators import current_year
-
 User = get_user_model()
 
 
@@ -52,7 +50,6 @@ class Title(models.Model):
         db_index=True)
     year = models.PositiveIntegerField(
         blank=True,
-        validators=[current_year],
         db_index=True
     )
     category = models.ForeignKey(
@@ -103,7 +100,6 @@ class Review(models.Model):
 
     class Meta:
         ordering = ('-pub_date',)
-        unique = ('author', 'title')
 
     def __str__(self):
         return self.text
@@ -122,6 +118,7 @@ class Comment(models.Model):
     text = models.TextField()
     created = models.DateTimeField(
         'Дата комментария', auto_now_add=True,)
+    pub_date = models.DateTimeField(auto_now_add=True)
 
     class Meta:
         ordering = ('-pub_date',)

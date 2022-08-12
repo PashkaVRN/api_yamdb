@@ -7,4 +7,5 @@ class MixinSet(
     mixins.ListModelMixin,
     viewsets.GenericViewSet
 ):
+    """Класс MixinSet для дальнейшего использования."""
     pass

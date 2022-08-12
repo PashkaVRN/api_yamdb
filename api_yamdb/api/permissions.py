@@ -46,7 +46,7 @@ class IsAdminOrReadOnly(BasePermission):
     """
     def has_permission(self, request, view):
         return True if (
-            request.methods in SAFE_METHODS
+            request.method in SAFE_METHODS
         ) else (
             request.user.role == User.ADMIN_ROLE
             or request.user.is_superuser
@@ -61,7 +61,7 @@ class IsModeratorAdminOrReadOnly(BasePermission):
     """
     def has_permission(self, request, view):
         return True if (
-            request.methods in SAFE_METHODS
+            request.method in SAFE_METHODS
         ) else (
             request.user.role == User.ADMIN_ROLE
             or request.user.role == User.MODERATOR_ROLE

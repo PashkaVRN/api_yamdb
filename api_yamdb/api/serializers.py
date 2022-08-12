@@ -31,7 +31,11 @@ class TitleSerializer(serializers.ModelSerializer):
         slug_field="slug",
         many=False
     )
-
+    
+    class Meta:
+        fields = '__all__'
+        model = Title
+    
 
 class CommentSerializer(serializers.ModelSerializer):
     '''Сериалайзер комментариев.'''
@@ -56,7 +60,7 @@ class CommentSerializer(serializers.ModelSerializer):
     class Meta:
         fields = '__all__'
         model = Comment
-
+    
 
 class TitleCreateSerializer(serializers.ModelSerializer):
     genre = serializers.SlugRelatedField(

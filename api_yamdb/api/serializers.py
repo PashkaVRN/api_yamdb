@@ -8,19 +8,21 @@ User = get_user_model()
 
 
 class CategorySerializer(serializers.ModelSerializer):
-    """Сериализатор модели Category."""
+    """Класс сериализатор категории."""
     class Meta:
         fields = ('name', 'slug',)
         model = Category
 
 
 class GenreSerializer(serializers.ModelSerializer):
+    """Класс сериализатор жанра."""
     class Meta:
         fields = ('name', 'slug')
         model = Genre
 
 
 class TitleSerializer(serializers.ModelSerializer):
+    """Класс сериализатор получения произведений."""
     genre = serializers.SlugRelatedField(
         read_only=True,
         slug_field="slug",
@@ -63,6 +65,7 @@ class CommentSerializer(serializers.ModelSerializer):
     
 
 class TitleCreateSerializer(serializers.ModelSerializer):
+    """Класс сериализатор создания произведений."""
     genre = serializers.SlugRelatedField(
         slug_field='slug',
         many=True,

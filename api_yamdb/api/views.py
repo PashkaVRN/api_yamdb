@@ -25,14 +25,9 @@ from .permissions import (IsAdmin, IsAdminOrReadOnly, IsAuthorOrReadOnly,
 from .serializers import (CategorySerializer, CommentSerializer,
                           GenreSerializer, GetJWTTokenSerializer,
                           ReviewSerializer, SignUpSerializer,
-                          TitleSerializer, TitleCreateSerializer,
-                          TitleCreateSerializer, TitleSerializer)
-
-                          TitleSerializer, TitleCreateSerializer,
-
                           TitleCreateSerializer, TitleSerializer,
-
                           UserRestrictedSerializer, UserSerializer)
+
 from .utils import get_confirmation_code, send_confirmation_code
 
 

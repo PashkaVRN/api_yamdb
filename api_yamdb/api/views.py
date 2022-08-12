@@ -185,7 +185,7 @@ class GenreViewSet(MixinSet):
     permission_classes = (IsAdminOrReadOnly,)
     pagination_class = LimitOffsetPagination
     filter_backends = (filters.SearchFilter,)
-    search_fields = ('=name', )
+    search_fields = ['=name']
     lookup_field = 'slug'
 
 

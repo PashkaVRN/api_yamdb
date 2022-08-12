@@ -17,7 +17,6 @@ from .permissions import IsAdmin
 from .serializers import (CategorySerializer, CommentSerializer,
                           GenreSerializer, GetJWTTokenSerializer,
                           ReviewSerializer, SignUpSerializer,
-                          TitleGetSerializer, TitlePostSerializer,
                           UserRestrictedSerializer, UserSerializer)
 from .utils import get_confirmation_code, send_confirmation_code
 from users.models import User
@@ -111,8 +110,6 @@ class UserViewSet(ModelViewSet):
             return Response(serializer.errors, status=HTTP_400_BAD_REQUEST)
         serializer.save()
         return Response(serializer.data, status=HTTP_200_OK)
-=======
-        return Response(serializer.errors, status=HTTP_400_BAD_REQUEST)
 
 
 class ReviewViewSet(viewsets.ModelViewSet):

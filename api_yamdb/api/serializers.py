@@ -67,8 +67,11 @@ class TitleCreateSerializer(serializers.ModelSerializer):
     category = serializers.SlugRelatedField(
         slug_field='slug',
         queryset=Category.objects.all(),
-        model=Comment
     )
+
+    class Meta:
+        model = Title
+        fields = '__all__'
 
 
 class ReviewSerializer(serializers.ModelSerializer):

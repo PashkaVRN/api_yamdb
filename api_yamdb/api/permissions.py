@@ -22,8 +22,9 @@ class IsAdmin(BasePermission):
     или имеет роль администратора.
     """
     def has_permission(self, request, view):
-        return (request.user.role == User.ADMIN_ROLE
-                or request.user.is_superuser)
+        if request.user.is_authenticated:
+            return (request.user.role == User.ADMIN_ROLE
+                    or request.user.is_superuser)
 
 
 class IsSelf(BasePermission):
@@ -45,12 +46,12 @@ class IsAdminOrReadOnly(BasePermission):
     Просмотр доступен всем пользователям.
     """
     def has_permission(self, request, view):
-        return True if (
-            request.method in SAFE_METHODS
-        ) else (
-            request.user.role == User.ADMIN_ROLE
-            or request.user.is_superuser
-        )
+        if request.method in SAFE_METHODS:
+            return True
+        if request.user.is_authenticated:
+            return (request.user.role == User.ADMIN_ROLE
+                    or request.user.is_superuser)
+        return False
 
 
 class IsModeratorAdminOrReadOnly(BasePermission):
@@ -60,10 +61,10 @@ class IsModeratorAdminOrReadOnly(BasePermission):
     Просмотр доступен всем пользователям.
     """
     def has_permission(self, request, view):
-        return True if (
-            request.method in SAFE_METHODS
-        ) else (
-            request.user.role == User.ADMIN_ROLE
-            or request.user.role == User.MODERATOR_ROLE
-            or request.user.is_superuser
-        )
+        if request.method in SAFE_METHODS:
+            return True
+        if request.user.is_authenticated:
+            return (request.user.role == User.ADMIN_ROLE
+                    or request.user.role == User.MODERATOR_ROLE
+                    or request.user.is_superuser)
+        return False

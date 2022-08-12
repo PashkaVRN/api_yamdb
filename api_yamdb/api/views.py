@@ -21,7 +21,7 @@ from .utils import get_confirmation_code, send_confirmation_code
 from users.models import User
 from .mixins import MixinSet
 from .utils import send_confirmation_code
-from .permissions import (IsAuthorOrReadOnly, IsAdmin, IsSelf,
+from .permissions import (IsAuthorOrReadOnly, IsAdmin,
                           IsAdminOrReadOnly, IsModeratorAdminOrReadOnly)
 
 

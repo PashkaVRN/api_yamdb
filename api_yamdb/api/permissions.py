@@ -22,9 +22,13 @@ class IsAdmin(BasePermission):
     или имеет роль администратора.
     """
     def has_permission(self, request, view):
+        user = request.user
         if request.user.is_authenticated:
-            return (request.user.role == User.ADMIN_ROLE
-                    or request.user.is_superuser)
+            return (
+                user.is_authenticated
+                and (request.user.role == User.ADMIN_ROLE
+                     or request.user.is_superuser)
+            )
 
 
 class IsSelf(BasePermission):
@@ -46,12 +50,14 @@ class IsAdminOrReadOnly(BasePermission):
     Просмотр доступен всем пользователям.
     """
     def has_permission(self, request, view):
-        if request.method in SAFE_METHODS:
-            return True
-        if request.user.is_authenticated:
-            return (request.user.role == User.ADMIN_ROLE
-                    or request.user.is_superuser)
-        return False
+        user = request.user
+        return True if (
+            request.method in SAFE_METHODS
+            ) else (
+                user.is_authenticated
+                and (user.role == User.ADMIN_ROLE
+                     or user.is_superuser)
+            )
 
 
 class IsModeratorAdminOrReadOnly(BasePermission):
@@ -61,10 +67,14 @@ class IsModeratorAdminOrReadOnly(BasePermission):
     Просмотр доступен всем пользователям.
     """
     def has_permission(self, request, view):
+        user = request.user
         if request.method in SAFE_METHODS:
             return True
-        if request.user.is_authenticated:
-            return (request.user.role == User.ADMIN_ROLE
-                    or request.user.role == User.MODERATOR_ROLE
-                    or request.user.is_superuser)
-        return False
+        return True if (
+            request.method in SAFE_METHODS
+            ) else (
+                user.is_authenticated
+                and (user.role == User.ADMIN_ROLE
+                     or user.role == User.MODERATOR_ROLE
+                     or user.is_superuser)
+            )

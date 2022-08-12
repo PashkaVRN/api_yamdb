@@ -1,8 +1,19 @@
 from django.contrib.auth import get_user_model
 from django.shortcuts import get_object_or_404
-from rest_framework.permissions import BasePermission
+from rest_framework.permissions import SAFE_METHODS, BasePermission
 
 User = get_user_model()
+
+
+class IsAuthorOrReadOnly(BasePermission):
+    """
+    Позволяет редактировать объекты только их автору.
+    Для остальных пользователей объекты доступны только для чтения.
+    """
+    def has_object_permission(self, request, view, obj):
+        return True if (
+            request.method in SAFE_METHODS
+        ) else obj.author == request.user
 
 
 class IsAdmin(BasePermission):
@@ -25,3 +36,34 @@ class IsSelf(BasePermission):
             username=request.data.get('username'),
             email=request.data.get('email')
         ) == request.user
+
+
+class IsAdminOrReadOnly(BasePermission):
+    """
+    Пользователь является супрюзером джанго
+    или имеет роль администратора.
+    Просмотр доступен всем пользователям.
+    """
+    def has_permission(self, request, view):
+        return True if (
+            request.methods in SAFE_METHODS
+        ) else (
+            request.user.role == User.ADMIN_ROLE
+            or request.user.is_superuser
+        )
+
+
+class IsModeratorAdminOrReadOnly(BasePermission):
+    """
+    Пользователь является супрюзером джанго
+    или имеет роль администратора или модератора.
+    Просмотр доступен всем пользователям.
+    """
+    def has_permission(self, request, view):
+        return True if (
+            request.methods in SAFE_METHODS
+        ) else (
+            request.user.role == User.ADMIN_ROLE
+            or request.user.role == User.MODERATOR_ROLE
+            or request.user.is_superuser
+        )

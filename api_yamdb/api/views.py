@@ -10,12 +10,12 @@ from rest_framework.status import HTTP_200_OK, HTTP_400_BAD_REQUEST
 from rest_framework.views import APIView
 from rest_framework.viewsets import ModelViewSet
 from rest_framework_simplejwt.tokens import RefreshToken
-from users.models import User
 
 from .permissions import IsAdmin
 from .serializers import (GetJWTTokenSerializer, SignUpSerializer,
                           UserRestrictedSerializer, UserSerializer)
 from .utils import get_confirmation_code, send_confirmation_code
+from users.models import User
 
 
 class SignUpView(APIView):

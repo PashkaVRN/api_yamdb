@@ -34,6 +34,10 @@ class TitleSerializer(serializers.ModelSerializer):
         many=False
     )
 
+    class Meta:
+        fields = '__all__'
+        model = Title
+
 
 class CommentSerializer(serializers.ModelSerializer):
     '''Сериалайзер комментариев.'''

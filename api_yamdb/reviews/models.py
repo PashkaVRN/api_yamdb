@@ -8,6 +8,7 @@ User = get_user_model()
 
 
 class Category(models.Model):
+    """Модель категорий."""
     name = models.TextField(
         'Название категории',
         max_length=100)
@@ -25,6 +26,7 @@ class Category(models.Model):
 
 
 class Genre(models.Model):
+    """Модель жанров."""
     name = models.TextField(
         'Название жанра',
         max_length=50
@@ -43,6 +45,7 @@ class Genre(models.Model):
 
 
 class Title(models.Model):
+    """Модель заголовков."""
     name = models.TextField(
         'Название',
         max_length=100,

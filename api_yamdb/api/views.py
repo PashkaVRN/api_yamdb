@@ -2,6 +2,8 @@ from django.shortcuts import get_object_or_404
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_exempt
 from rest_framework import viewsets
+from rest_framework.response import Response
+from rest_framework import filters, viewsets
 from rest_framework.decorators import action
 from rest_framework.filters import SearchFilter
 from rest_framework.pagination import LimitOffsetPagination
@@ -23,6 +25,11 @@ from .serializers import (CategorySerializer, CommentSerializer,
                           TitleCreateSerializer, TitleSerializer,
                           UserRestrictedSerializer, UserSerializer)
 from .utils import get_confirmation_code, send_confirmation_code
+
+from users.models import User
+from .mixins import MixinSet
+from .filters import TitleFilter
+from .utils import send_confirmation_code
 
 
 class SignUpView(APIView):
@@ -155,24 +162,33 @@ class CommentViewSet(viewsets.ModelViewSet):
 
 
 class CategoryViewSet(MixinSet):
+    """Класс категория, доступно только админу."""
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
+    permission_classes = (IsAdminOrReadOnly,)
     pagination_class = LimitOffsetPagination
+    filter_backends = (filters.SearchFilter,)
     search_fields = ('=name', )
     lookup_field = 'slug'
 
 
 class GenreViewSet(MixinSet):
+    """Класс жанр, доступно только админу."""
     queryset = Genre.objects.all()
     serializer_class = GenreSerializer
+    permission_classes = (IsAdminOrReadOnly,)
     pagination_class = LimitOffsetPagination
-    search_fields = ('=name', )
+    filter_backends = (filters.SearchFilter,)
+    search_fields = ['=name']
     lookup_field = 'slug'
 
 
 class TitleViewSet(viewsets.ModelViewSet):
+    """Класс произведения, доступно только админу."""
     queryset = Title.objects.all()
+    permission_classes = (IsAdminOrReadOnly,)
     pagination_class = LimitOffsetPagination
+    filterset_class = TitleFilter
 
     def get_serializer_class(self):
         if self.request.method in ('POST', 'PATCH',):

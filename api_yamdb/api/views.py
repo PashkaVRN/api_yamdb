@@ -19,7 +19,7 @@ from reviews.models import Category, Genre, Review, Title, Comment
 from users.models import User
 
 from .mixins import MixinSet
-from .permissions import (IsAdmin, IsAdminOrReadOnly, IsAuthorOrReadOnly,
+from .permissions import (IsAdmin, IsAdminOrReadOnly,
                           IsModeratorAdminOrReadOnly)
 from .serializers import (CategorySerializer, CommentSerializer,
                           GenreSerializer, GetJWTTokenSerializer,
@@ -150,8 +150,7 @@ class CommentViewSet(viewsets.ModelViewSet):
     queryset = Comment.objects.all()
     serializer_class = CommentSerializer
     pagination_class = LimitOffsetPagination
-    permission_classes = [
-        IsAuthorOrReadOnly, IsModeratorAdminOrReadOnly, IsAdminOrReadOnly]
+    permission_classes = [IsModeratorAdminOrReadOnly, ]
 
     def get_queryset(self):
         review = get_object_or_404(
@@ -195,7 +194,7 @@ class GenreViewSet(MixinSet):
 class TitleViewSet(viewsets.ModelViewSet):
     """Класс произведения, доступно только админу."""
     queryset = Title.objects.annotate(
-        rating=Avg('reviews__scope')
+        rating=Avg('review__score')
     ).all().order_by('name')
     serializer_class = TitleCreateSerializer
     permission_classes = (IsAdminOrReadOnly,)

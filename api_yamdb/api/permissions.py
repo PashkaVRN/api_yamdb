@@ -65,19 +65,14 @@ class IsModeratorAdminOrReadOnly(BasePermission):
     или имеет роль администратора или модератора.
     Просмотр доступен всем пользователям.
     """
+    def has_object_permission(self, request, view, obj):
+        return (
+            request.method in SAFE_METHODS
+            or obj.author == request.user
+            or request.user.role == User.ADMIN_ROLE
+            or request.user.role == User.MODERATOR_ROLE
+            or request.user.is_superuser)
 
     def has_permission(self, request, view):
-        user = request.user
-        if request.method in SAFE_METHODS:
-            return True
-        return True if (
-            request.method in SAFE_METHODS) else (
-                user.is_authenticated
-                and (user.role == User.ADMIN_ROLE
-                     or user.role == User.MODERATOR_ROLE
-                     or user.is_superuser))
-
-    def has_object_permission(self, request, view, obj):
         return (request.method in SAFE_METHODS
-                or obj.author == request.user)
-                
+                or request.user.is_authenticated)

@@ -2,9 +2,7 @@ from django.db.models import Avg
 from django.shortcuts import get_object_or_404
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_exempt
-from rest_framework import viewsets
 from django_filters.rest_framework import DjangoFilterBackend
-from rest_framework.response import Response
 from rest_framework import filters, viewsets
 from rest_framework.decorators import action
 from rest_framework.filters import SearchFilter
@@ -15,24 +13,18 @@ from rest_framework.status import HTTP_200_OK, HTTP_400_BAD_REQUEST
 from rest_framework.views import APIView
 from rest_framework.viewsets import ModelViewSet
 from rest_framework_simplejwt.tokens import RefreshToken
-from reviews.models import Category, Genre, Review, Title, Comment
-from users.models import User
 
+from reviews.models import Category, Comment, Genre, Review, Title
+from .filters import TitleFilter
 from .mixins import MixinSet
-from .permissions import (IsAdmin, IsAdminOrReadOnly,
-                          IsModeratorAdminOrReadOnly)
+from .permissions import IsAdmin, IsAdminOrReadOnly, IsModeratorAdminOrReadOnly
 from .serializers import (CategorySerializer, CommentSerializer,
                           GenreSerializer, GetJWTTokenSerializer,
                           ReviewSerializer, SignUpSerializer,
                           TitleCreateSerializer, TitleListSerializer,
                           UserRestrictedSerializer, UserSerializer)
-
 from .utils import get_confirmation_code, send_confirmation_code
-
 from users.models import User
-from .mixins import MixinSet
-from .filters import TitleFilter
-from .utils import send_confirmation_code
 
 
 class SignUpView(APIView):

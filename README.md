@@ -102,4 +102,15 @@ http://127.0.0.1:8000/api/v1/titles/
 ```
 
 
-git@github.com:PashkaVRN/api_yamdb.git
+Авторы:
+```
+https://github.com/PashkaVRN - Павел Шевель Тим Лид(Review/Comments)
+```
+```
+https://github.com/BomberDim - Дмитрий	Кузнецов(Categories/Genres/Titles)
+```
+```
+https://github.com/sHvostom - Андрей	Малёванный(Auth/Users)
+```
+
+

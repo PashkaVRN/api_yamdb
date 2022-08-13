@@ -3,12 +3,7 @@ from django.shortcuts import get_object_or_404
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_exempt
 from django_filters.rest_framework import DjangoFilterBackend
-
-from rest_framework.response import Response
-from rest_framework import filters, viewsets, request
-
-from rest_framework import request, viewsets
-
+from rest_framework import filters, viewsets
 from rest_framework.decorators import action
 from rest_framework.filters import SearchFilter
 from rest_framework.pagination import LimitOffsetPagination
@@ -18,27 +13,18 @@ from rest_framework.status import HTTP_200_OK, HTTP_400_BAD_REQUEST
 from rest_framework.views import APIView
 from rest_framework.viewsets import ModelViewSet
 from rest_framework_simplejwt.tokens import RefreshToken
-from reviews.models import Category, Genre, Review, Title
-from users.models import User
 
+from reviews.models import Category, Comment, Genre, Review, Title
+from .filters import TitleFilter
 from .mixins import MixinSet
-from .permissions import (IsAdmin, IsAdminOrReadOnly, IsAuthorOrReadOnly,
-                          IsModeratorAdminOrReadOnly)
+from .permissions import IsAdmin, IsAdminOrReadOnly, IsModeratorAdminOrReadOnly
 from .serializers import (CategorySerializer, CommentSerializer,
                           GenreSerializer, GetJWTTokenSerializer,
                           ReviewSerializer, SignUpSerializer,
                           TitleCreateSerializer, TitleListSerializer,
                           UserRestrictedSerializer, UserSerializer)
-
 from .utils import get_confirmation_code, send_confirmation_code
-
-
 from users.models import User
-from .mixins import MixinSet
-from .filters import TitleFilter
-from .utils import send_confirmation_code
-from .permissions import (IsAuthorOrReadOnly, IsAdmin,
-                          IsAdminOrReadOnly, IsModeratorAdminOrReadOnly)
 
 
 class SignUpView(APIView):
@@ -133,33 +119,45 @@ class ReviewViewSet(viewsets.ModelViewSet):
     """Просмотр и редактирование рецензий."""
     serializer_class = ReviewSerializer
     pagination_class = LimitOffsetPagination
-    permission_classes = [IsAuthorOrReadOnly, IsModeratorAdminOrReadOnly]
+    permission_classes = [IsModeratorAdminOrReadOnly, ]
 
     def get_queryset(self):
-        title = get_object_or_404(Title, pk=self.kwargs.get("title_id"))
-        return title.reviews.all()
+        title = get_object_or_404(
+            Title,
+            id=self.kwargs.get('title_id'))
+        return title.review.all()
 
     def perform_create(self, serializer):
-        title_id = self.kwargs.get('title_id')
-        title = get_object_or_404(Title, id=title_id)
-        serializer.save(author=self.request.user, title=title)
+        title_id = get_object_or_404(
+            Title,
+            pk=self.kwargs.get('title_id'))
+        serializer.save(
+            author=self.request.user,
+            title=title_id
+        )
 
 
 class CommentViewSet(viewsets.ModelViewSet):
     """Просмотр и редактирование комментариев."""
+    queryset = Comment.objects.all()
     serializer_class = CommentSerializer
     pagination_class = LimitOffsetPagination
-    permission_classes = [
-        IsAuthorOrReadOnly, IsModeratorAdminOrReadOnly, IsAdminOrReadOnly]
+    permission_classes = [IsModeratorAdminOrReadOnly, ]
 
     def get_queryset(self):
-        review = get_object_or_404(Review, pk=self.kwargs.get("review_id"))
+        review = get_object_or_404(
+            Review,
+            id=self.kwargs.get('review_id'))
         return review.comments.all()
 
     def perform_create(self, serializer):
         title_id = self.kwargs.get('title_id')
         review_id = self.kwargs.get('review_id')
-        review = get_object_or_404(Review, id=review_id, title=title_id)
+        review = get_object_or_404(
+            Review,
+            id=review_id,
+            title=title_id
+        )
         serializer.save(author=self.request.user, review=review)
 
 
@@ -188,7 +186,7 @@ class GenreViewSet(MixinSet):
 class TitleViewSet(viewsets.ModelViewSet):
     """Класс произведения, доступно только админу."""
     queryset = Title.objects.annotate(
-        rating=Avg('reviews__scope')
+        rating=Avg('review__score')
     ).all().order_by('name')
     serializer_class = TitleCreateSerializer
     permission_classes = (IsAdminOrReadOnly,)

@@ -1,3 +1,5 @@
+import datetime as dt
+
 from django.core.exceptions import ValidationError
 from django.contrib.auth import get_user_model
 from django.shortcuts import get_object_or_404
@@ -21,22 +23,15 @@ class GenreSerializer(serializers.ModelSerializer):
         model = Genre
 
 
-class TitleSerializer(serializers.ModelSerializer):
-    """Класс сериализатор получения произведений."""
-    genre = serializers.SlugRelatedField(
-        read_only=True,
-        slug_field="slug",
-        many=True
-    )
-    category = serializers.SlugRelatedField(
-        read_only=True,
-        slug_field="slug",
-        many=False
-    )
+class TitleListSerializer(serializers.ModelSerializer):
+    """Класс сериализатор получения списка произведений."""
+    genre = GenreSerializer(many=True, read_only=True)
+    category = CategorySerializer(read_only=True)
+    rating = serializers.IntegerField(read_only=True)
 
     class Meta:
-        fields = '__all__'
         model = Title
+        fields = '__all__'
 
 
 class CommentSerializer(serializers.ModelSerializer):
@@ -62,23 +57,33 @@ class CommentSerializer(serializers.ModelSerializer):
     class Meta:
         fields = '__all__'
         model = Comment
-    
+
 
 class TitleCreateSerializer(serializers.ModelSerializer):
     """Класс сериализатор создания произведений."""
+    category = serializers.SlugRelatedField(
+        slug_field='slug',
+        many=False,
+        queryset=Category.objects.all()
+    )
     genre = serializers.SlugRelatedField(
         slug_field='slug',
         many=True,
+        required=False,
         queryset=Genre.objects.all()
-    )
-    category = serializers.SlugRelatedField(
-        slug_field='slug',
-        queryset=Category.objects.all(),
     )
 
     class Meta:
         model = Title
         fields = '__all__'
+
+    def year_validate(self, value):
+        current_year = dt.date.today().year
+        if value > current_year:
+            raise serializers.ValidationError(
+                'Год выпуска не может быть больше текущего'
+            )
+        return value
 
 
 class ReviewSerializer(serializers.ModelSerializer):

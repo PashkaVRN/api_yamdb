@@ -1,6 +1,8 @@
+from django.db.models import Avg
 from django.shortcuts import get_object_or_404
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_exempt
+from django_filters.rest_framework import DjangoFilterBackend
 
 from rest_framework.response import Response
 from rest_framework import filters, viewsets, request
@@ -25,7 +27,7 @@ from .permissions import (IsAdmin, IsAdminOrReadOnly, IsAuthorOrReadOnly,
 from .serializers import (CategorySerializer, CommentSerializer,
                           GenreSerializer, GetJWTTokenSerializer,
                           ReviewSerializer, SignUpSerializer,
-                          TitleCreateSerializer, TitleSerializer,
+                          TitleCreateSerializer, TitleListSerializer,
                           UserRestrictedSerializer, UserSerializer)
 
 from .utils import get_confirmation_code, send_confirmation_code
@@ -37,7 +39,6 @@ from .filters import TitleFilter
 from .utils import send_confirmation_code
 from .permissions import (IsAuthorOrReadOnly, IsAdmin,
                           IsAdminOrReadOnly, IsModeratorAdminOrReadOnly)
-
 
 
 class SignUpView(APIView):
@@ -168,8 +169,8 @@ class CategoryViewSet(MixinSet):
     serializer_class = CategorySerializer
     permission_classes = (IsAdminOrReadOnly,)
     pagination_class = LimitOffsetPagination
-    filter_backends = (filters.SearchFilter,)
-    search_fields = ('=name', )
+    filter_backends = [filters.SearchFilter]
+    search_fields = ['=name']
     lookup_field = 'slug'
 
 
@@ -179,19 +180,24 @@ class GenreViewSet(MixinSet):
     serializer_class = GenreSerializer
     permission_classes = (IsAdminOrReadOnly,)
     pagination_class = LimitOffsetPagination
-    filter_backends = (filters.SearchFilter,)
+    filter_backends = [filters.SearchFilter]
     search_fields = ['=name']
     lookup_field = 'slug'
 
 
 class TitleViewSet(viewsets.ModelViewSet):
     """Класс произведения, доступно только админу."""
-    queryset = Title.objects.all()
+    queryset = Title.objects.annotate(
+        rating=Avg('reviews__scope')
+    ).all().order_by('name')
+    serializer_class = TitleCreateSerializer
     permission_classes = (IsAdminOrReadOnly,)
     pagination_class = LimitOffsetPagination
+    filter_backends = [DjangoFilterBackend]
     filterset_class = TitleFilter
+    filterset_fields = ['name']
 
     def get_serializer_class(self):
-        if self.request.method in ('POST', 'PATCH',):
-            return TitleCreateSerializer
-        return TitleSerializer
+        if self.action in ['list', 'retrieve']:
+            return TitleListSerializer
+        return TitleCreateSerializer

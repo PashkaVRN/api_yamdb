@@ -66,10 +66,6 @@ class IsModeratorAdminOrReadOnly(BasePermission):
     Просмотр доступен всем пользователям.
     """
 
-    def has_permission(self, request, view, obj):
-        return (request.method in SAFE_METHODS
-                or obj.author == request.user)
-
     def has_permission(self, request, view):
         user = request.user
         if request.method in SAFE_METHODS:
@@ -80,3 +76,8 @@ class IsModeratorAdminOrReadOnly(BasePermission):
                 and (user.role == User.ADMIN_ROLE
                      or user.role == User.MODERATOR_ROLE
                      or user.is_superuser))
+
+    def has_object_permission(self, request, view, obj):
+        return (request.method in SAFE_METHODS
+                or obj.author == request.user)
+                

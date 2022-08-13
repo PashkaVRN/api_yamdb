@@ -1,6 +1,14 @@
+from django.db.models import Avg
 from django.shortcuts import get_object_or_404
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_exempt
+from django_filters.rest_framework import DjangoFilterBackend
+
+from rest_framework.response import Response
+from rest_framework import filters, viewsets, request
+
+from rest_framework import request, viewsets
+
 from rest_framework.decorators import action
 from rest_framework.filters import SearchFilter
 from rest_framework.pagination import LimitOffsetPagination
@@ -10,12 +18,27 @@ from rest_framework.status import HTTP_200_OK, HTTP_400_BAD_REQUEST
 from rest_framework.views import APIView
 from rest_framework.viewsets import ModelViewSet
 from rest_framework_simplejwt.tokens import RefreshToken
-
-from .permissions import IsAdmin
-from .serializers import (GetJWTTokenSerializer, SignUpSerializer,
-                          UserRestrictedSerializer, UserSerializer)
-from .utils import get_confirmation_code, send_confirmation_code
+from reviews.models import Category, Genre, Review, Title
 from users.models import User
+
+from .mixins import MixinSet
+from .permissions import (IsAdmin, IsAdminOrReadOnly, IsAuthorOrReadOnly,
+                          IsModeratorAdminOrReadOnly)
+from .serializers import (CategorySerializer, CommentSerializer,
+                          GenreSerializer, GetJWTTokenSerializer,
+                          ReviewSerializer, SignUpSerializer,
+                          TitleCreateSerializer, TitleListSerializer,
+                          UserRestrictedSerializer, UserSerializer)
+
+from .utils import get_confirmation_code, send_confirmation_code
+
+
+from users.models import User
+from .mixins import MixinSet
+from .filters import TitleFilter
+from .utils import send_confirmation_code
+from .permissions import (IsAuthorOrReadOnly, IsAdmin,
+                          IsAdminOrReadOnly, IsModeratorAdminOrReadOnly)
 
 
 class SignUpView(APIView):
@@ -104,3 +127,77 @@ class UserViewSet(ModelViewSet):
             return Response(serializer.errors, status=HTTP_400_BAD_REQUEST)
         serializer.save()
         return Response(serializer.data, status=HTTP_200_OK)
+
+
+class ReviewViewSet(viewsets.ModelViewSet):
+    """Просмотр и редактирование рецензий."""
+    serializer_class = ReviewSerializer
+    pagination_class = LimitOffsetPagination
+    permission_classes = [IsAuthorOrReadOnly, IsModeratorAdminOrReadOnly]
+
+    def get_queryset(self):
+        title = get_object_or_404(Title, pk=self.kwargs.get("title_id"))
+        return title.reviews.all()
+
+    def perform_create(self, serializer):
+        title_id = self.kwargs.get('title_id')
+        title = get_object_or_404(Title, id=title_id)
+        serializer.save(author=self.request.user, title=title)
+
+
+class CommentViewSet(viewsets.ModelViewSet):
+    """Просмотр и редактирование комментариев."""
+    serializer_class = CommentSerializer
+    pagination_class = LimitOffsetPagination
+    permission_classes = [
+        IsAuthorOrReadOnly, IsModeratorAdminOrReadOnly, IsAdminOrReadOnly]
+
+    def get_queryset(self):
+        review = get_object_or_404(Review, pk=self.kwargs.get("review_id"))
+        return review.comments.all()
+
+    def perform_create(self, serializer):
+        title_id = self.kwargs.get('title_id')
+        review_id = self.kwargs.get('review_id')
+        review = get_object_or_404(Review, id=review_id, title=title_id)
+        serializer.save(author=self.request.user, review=review)
+
+
+class CategoryViewSet(MixinSet):
+    """Класс категория, доступно только админу."""
+    queryset = Category.objects.all()
+    serializer_class = CategorySerializer
+    permission_classes = (IsAdminOrReadOnly,)
+    pagination_class = LimitOffsetPagination
+    filter_backends = [filters.SearchFilter]
+    search_fields = ['=name']
+    lookup_field = 'slug'
+
+
+class GenreViewSet(MixinSet):
+    """Класс жанр, доступно только админу."""
+    queryset = Genre.objects.all()
+    serializer_class = GenreSerializer
+    permission_classes = (IsAdminOrReadOnly,)
+    pagination_class = LimitOffsetPagination
+    filter_backends = [filters.SearchFilter]
+    search_fields = ['=name']
+    lookup_field = 'slug'
+
+
+class TitleViewSet(viewsets.ModelViewSet):
+    """Класс произведения, доступно только админу."""
+    queryset = Title.objects.annotate(
+        rating=Avg('reviews__scope')
+    ).all().order_by('name')
+    serializer_class = TitleCreateSerializer
+    permission_classes = (IsAdminOrReadOnly,)
+    pagination_class = LimitOffsetPagination
+    filter_backends = [DjangoFilterBackend]
+    filterset_class = TitleFilter
+    filterset_fields = ['name']
+
+    def get_serializer_class(self):
+        if self.action in ['list', 'retrieve']:
+            return TitleListSerializer
+        return TitleCreateSerializer

@@ -18,10 +18,14 @@ http://127.0.0.1:8000/redoc/
 ### Как запустить проект на тестовом сервере:
 Клонировать репозиторий, перейти в директорию с проектом.
 
+```
+git@github.com:PashkaVRN/api_yamdb.git
+```
+
 Cоздать и активировать виртуальное окружение:
 
 ```
-python3 -m venv venv
+python -m venv venv
 ```
 
 ```
@@ -31,23 +35,22 @@ source venv/source/activate
 Установить зависимости из файла requirements.txt:
 
 ```
-python3 -m pip install --upgrade pip
-```
-
-```
 pip install -r requirements.txt
 ```
 
 Выполнить миграции:
 
 ```
-python3 api_yamdb/manage.py migrate
+python manage.py makemigrations
+```
+```
+python manage.py migrate
 ```
 
 Запустить проект:
 
 ```
-python3 api_yamdb/manage.py runserver
+python manage.py runserver
 ```
 
 ### Авторизация пользователей:
@@ -97,3 +100,6 @@ http://127.0.0.1:8000/api/v1/genres/
 ```
 http://127.0.0.1:8000/api/v1/titles/
 ```
+
+
+git@github.com:PashkaVRN/api_yamdb.git

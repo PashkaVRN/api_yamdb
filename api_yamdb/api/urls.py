@@ -7,22 +7,22 @@ from .views import (CategoryViewSet, CommentViewSet, GenreViewSet,
 
 app_name = 'api'
 
-router = DefaultRouter()
+router_v1 = DefaultRouter()
 
-router.register('users', UserViewSet, basename='users')
-router.register(
+router_v1.register('users', UserViewSet, basename='users')
+router_v1.register(
     r'titles/(?P<title_id>\d+)/reviews', ReviewViewSet,
     basename='reviews'
 )
-router.register(
+router_v1.register(
     r'^titles/(?P<title_id>\d+)/reviews/(?P<review_id>\d+)/comments',
     CommentViewSet, basename='comments')
-router.register('titles', TitleViewSet, basename='title')
-router.register('categories', CategoryViewSet, basename='category')
-router.register('genres', GenreViewSet, basename='genre')
+router_v1.register('titles', TitleViewSet, basename='title')
+router_v1.register('categories', CategoryViewSet, basename='category')
+router_v1.register('genres', GenreViewSet, basename='genre')
 
 urlpatterns = [
-    path('', include(router.urls)),
+    path('', include(router_v1.urls)),
     path('auth/signup/', SignUpView.as_view(), name='sign_up'),
     path('auth/token/', GetJWTTokenView.as_view(), name='get_token')
 ]

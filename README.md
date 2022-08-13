@@ -107,10 +107,10 @@ http://127.0.0.1:8000/api/v1/titles/
 https://github.com/PashkaVRN - Павел Шевель Тим Лид(Review/Comments)
 ```
 ```
-https://github.com/BomberDim - Дмитрий	Кузнецов(Categories/Genres/Titles)
+https://github.com/BomberDim - Дмитрий Кузнецов(Categories/Genres/Titles)
 ```
 ```
-https://github.com/sHvostom - Андрей	Малёванный(Auth/Users)
+https://github.com/sHvostom - Андрей Малёванный(Auth/Users)
 ```
 
 

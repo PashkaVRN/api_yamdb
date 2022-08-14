@@ -2,44 +2,45 @@ from django.contrib.auth import get_user_model
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 
+from .validator import year_validate
+
 User = get_user_model()
 
 
-class Category(models.Model):
+class Common(models.Model):
+    name = models.TextField(
+        max_length=100
+    )
+    slug = models.SlugField(
+        'slug',
+        unique=True,
+        db_index=True
+    )
+
+    class Meta:
+        abstract = True
+        ordering = ('name',)
+
+    def __str__(self):
+        return self.name
+
+
+class Category(Common):
     """Модель категорий."""
-    name = models.TextField(
-        'Название категории',
-        max_length=100)
-    slug = models.SlugField(
-        'slug',
-        unique=True,
-        db_index=True
-    )
+    pass
 
-    class Meta:
-        ordering = ('name',)
-
-    def __str__(self):
-        return self.name
+    class Meta(Common.Meta):
+        verbose_name = 'Категория'
+        verbose_name_plural = 'Категории'
 
 
-class Genre(models.Model):
+class Genre(Common):
     """Модель жанров."""
-    name = models.TextField(
-        'Название жанра',
-        max_length=50
-    )
-    slug = models.SlugField(
-        'slug',
-        unique=True,
-        db_index=True
-    )
+    pass
 
-    class Meta:
-        ordering = ('name',)
-
-    def __str__(self):
-        return self.name
+    class Meta(Common.Meta):
+        verbose_name = 'Жанр'
+        verbose_name_plural = 'Жанры'
 
 
 class Title(models.Model):
@@ -48,9 +49,11 @@ class Title(models.Model):
         'Название',
         max_length=100,
         db_index=True)
-    year = models.PositiveIntegerField(
+    year = models.IntegerField(
+        'Год',
         blank=True,
-        db_index=True
+        db_index=True,
+        validators=(year_validate,)
     )
     category = models.ForeignKey(
         Category,

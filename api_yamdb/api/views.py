@@ -6,7 +6,6 @@ from django.views.decorators.csrf import csrf_exempt
 from rest_framework import viewsets
 from rest_framework.decorators import action
 from rest_framework.filters import SearchFilter
-from rest_framework.pagination import LimitOffsetPagination
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.status import HTTP_200_OK, HTTP_400_BAD_REQUEST
@@ -85,7 +84,6 @@ class UserViewSet(ModelViewSet):
     queryset = User.objects.all()
     serializer_class = UserSerializer
     permission_classes = [IsAuthenticated, IsAdmin]
-    pagination_class = LimitOffsetPagination
     lookup_field = 'username'
     filter_backends = [SearchFilter]
     search_fields = ('username',)
@@ -118,7 +116,6 @@ class UserViewSet(ModelViewSet):
 class ReviewViewSet(viewsets.ModelViewSet):
     """Просмотр и редактирование рецензий."""
     serializer_class = ReviewSerializer
-    pagination_class = LimitOffsetPagination
     permission_classes = [IsModeratorAdminOrReadOnly, ]
 
     def get_queryset(self):
@@ -141,7 +138,6 @@ class CommentViewSet(viewsets.ModelViewSet):
     """Просмотр и редактирование комментариев."""
     queryset = Comment.objects.all()
     serializer_class = CommentSerializer
-    pagination_class = LimitOffsetPagination
     permission_classes = [IsModeratorAdminOrReadOnly, ]
 
     def get_queryset(self):
@@ -179,7 +175,6 @@ class TitleViewSet(viewsets.ModelViewSet):
         rating=Avg('review__score')).all()
     serializer_class = TitleCreateSerializer
     permission_classes = (IsAdminOrReadOnly,)
-    pagination_class = LimitOffsetPagination
     filterset_class = TitleFilter
     filterset_fields = ['name']
     ordering_fields = ('name',)

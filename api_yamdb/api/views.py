@@ -7,24 +7,25 @@ from rest_framework import filters, viewsets
 from rest_framework.decorators import action
 from rest_framework.filters import SearchFilter
 from rest_framework.pagination import LimitOffsetPagination
-from rest_framework.permissions import AllowAny, IsAuthenticated
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.status import HTTP_200_OK, HTTP_400_BAD_REQUEST
 from rest_framework.views import APIView
 from rest_framework.viewsets import ModelViewSet
 from rest_framework_simplejwt.tokens import RefreshToken
-
 from reviews.models import Category, Comment, Genre, Review, Title
+
+from users.models import User
 from .filters import TitleFilter
 from .mixins import MixinSet
-from .permissions import IsAdmin, IsAdminOrReadOnly, IsModeratorAdminOrReadOnly
+from .permissions import (IsAdmin, IsAdminOrReadOnly,
+                          IsAuthorModeratorAdminOrReadOnly)
 from .serializers import (CategorySerializer, CommentSerializer,
                           GenreSerializer, GetJWTTokenSerializer,
                           ReviewSerializer, SignUpSerializer,
                           TitleCreateSerializer, TitleListSerializer,
                           UserRestrictedSerializer, UserSerializer)
 from .utils import get_confirmation_code, send_confirmation_code
-from users.models import User
 
 
 class SignUpView(APIView):
@@ -33,18 +34,14 @@ class SignUpView(APIView):
     Создаёт нового пользователя, если он не был создан ранее администратором.
     Отправляет код для подтверждения регистрации на email пользователя.
     """
-    permission_classes = [AllowAny]
 
     def post(self, request):
         serializer = SignUpSerializer(data=request.data)
         username = serializer.initial_data.get('username')
         email = serializer.initial_data.get('email')
         if not User.objects.filter(username=username, email=email).exists():
-            if serializer.is_valid():
-                serializer.save()
-            else:
-                return Response(serializer.errors, status=HTTP_400_BAD_REQUEST)
-        user = User.objects.get(username=username)
+            serializer.is_valid(raise_exception=True)
+        user = User.objects.get_or_create(username=username, email=email)[0]
         user.confirmation_code = get_confirmation_code()
         user.save()
         send_confirmation_code(user)
@@ -57,15 +54,13 @@ class GetJWTTokenView(APIView):
     Запрос на получение JWT токена.
     Для получения необходим корректный confirmation code.
     """
-    permission_classes = [AllowAny]
 
     def post(self, request):
         serializer = GetJWTTokenSerializer(data=request.data)
         username = serializer.initial_data.get('username')
-        if not serializer.is_valid():
-            return Response(serializer.errors, status=HTTP_400_BAD_REQUEST)
+        serializer.is_valid(raise_exception=True)
         user = get_object_or_404(User, username=username)
-        if not user.confirmation_code == serializer.data['confirmation_code']:
+        if user.confirmation_code != serializer.data['confirmation_code']:
             return Response(serializer.errors, status=HTTP_400_BAD_REQUEST)
         return Response(
             {
@@ -84,8 +79,7 @@ class UserViewSet(ModelViewSet):
     """
     queryset = User.objects.all()
     serializer_class = UserSerializer
-    permission_classes = [IsAuthenticated, IsAdmin]
-    pagination_class = LimitOffsetPagination
+    permission_classes = [IsAdmin]
     lookup_field = 'username'
     filter_backends = [SearchFilter]
     search_fields = ('username',)
@@ -98,20 +92,14 @@ class UserViewSet(ModelViewSet):
     )
     def self_account(self, request):
         """Просмотр и изменение своего аккаунта."""
-        # просмотр
-        if request.method == 'GET':
-            return Response(
-                UserSerializer(request.user).data,
-                status=HTTP_200_OK
-            )
-        # изменение
         serializer = UserRestrictedSerializer(
             request.user,
             data=request.data,
-            partial=True)
-        if not serializer.is_valid():
-            return Response(serializer.errors, status=HTTP_400_BAD_REQUEST)
-        serializer.save()
+            partial=True
+        )
+        serializer.is_valid(raise_exception=True)
+        if request.method == 'PATCH':
+            serializer.save()
         return Response(serializer.data, status=HTTP_200_OK)
 
 
@@ -119,7 +107,7 @@ class ReviewViewSet(viewsets.ModelViewSet):
     """Просмотр и редактирование рецензий."""
     serializer_class = ReviewSerializer
     pagination_class = LimitOffsetPagination
-    permission_classes = [IsModeratorAdminOrReadOnly, ]
+    permission_classes = [IsAuthorModeratorAdminOrReadOnly, ]
 
     def get_queryset(self):
         title = get_object_or_404(
@@ -142,7 +130,7 @@ class CommentViewSet(viewsets.ModelViewSet):
     queryset = Comment.objects.all()
     serializer_class = CommentSerializer
     pagination_class = LimitOffsetPagination
-    permission_classes = [IsModeratorAdminOrReadOnly, ]
+    permission_classes = [IsAuthorModeratorAdminOrReadOnly, ]
 
     def get_queryset(self):
         review = get_object_or_404(

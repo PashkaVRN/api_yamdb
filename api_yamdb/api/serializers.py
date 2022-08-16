@@ -38,6 +38,8 @@ class TitleListSerializer(serializers.ModelSerializer):
     class Meta:
         model = Title
         fields = '__all__'
+        read_only_fields = ('id', 'name',
+                            'year', 'description')
 
 
 class CommentSerializer(serializers.ModelSerializer):
@@ -78,6 +80,18 @@ class TitleCreateSerializer(serializers.ModelSerializer):
                 'Год выпуска не может быть больше текущего'
             )
         return value
+
+
+class CustomCategory(serializers.SlugRelatedField):
+    def to_representation(self, value):
+        serializer = CategorySerializer(value)
+        return serializer.data
+
+
+class CustomGenre(serializers.SlugRelatedField):
+    def to_representation(self, value):
+        serializer = GenreSerializer(value)
+        return serializer.data
 
 
 class ReviewSerializer(serializers.ModelSerializer):

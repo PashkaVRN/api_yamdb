@@ -1,6 +1,7 @@
 import datetime as dt
 
 from django.contrib.auth import get_user_model
+from django.core.validators import MaxValueValidator, MinValueValidator
 from django.shortcuts import get_object_or_404
 from rest_framework import serializers
 from rest_framework.validators import UniqueValidator
@@ -45,11 +46,11 @@ class CommentSerializer(serializers.ModelSerializer):
         read_only=True,
         slug_field='username'
     )
-    review = serializers.SlugRelatedField(slug_field='text', read_only=True)
 
     class Meta:
-        fields = '__all__'
         model = Comment
+        fields = ('id', 'author', 'pub_date', 'text')
+        read_only_fields = ('id', 'author', 'pub_date')
 
 
 class TitleCreateSerializer(serializers.ModelSerializer):
@@ -89,21 +90,27 @@ class ReviewSerializer(serializers.ModelSerializer):
         slug_field='username',
         read_only=True
     )
-
-    def validate(self, data):
-        request = self.context['request']
-        author = request.user
-        title_id = self.context['view'].kwargs.get('title_id')
-        title = get_object_or_404(Title, pk=title_id)
-        if request.method == 'POST':
-            if Review.objects.filter(title=title, author=author).exists():
-                raise serializers.ValidationError('Вы уже оставили свой отзыв'
-                                                  'к этому произведению!')
-        return data
+    score = serializers.IntegerField(
+        validators=[
+            MinValueValidator(1, 'Оценка должна быть не меньше 1.'),
+            MaxValueValidator(10, 'Оценка должна быть не больше 10.')
+        ],
+    )
 
     class Meta:
         model = Review
         fields = '__all__'
+
+    def validate(self, data):
+        title_id = self.context.get('view').kwargs.get('title_id')
+        title = get_object_or_404(Title, pk=title_id)
+        request = self.context['request']
+        author = request.user
+        if (request.method == 'POST'
+           and Review.objects.filter(title=title, author=author).exists()):
+            raise serializers.ValidationError('Вы уже оставили свой отзыв'
+                                              'к этому произведению!')
+        return data
 
 
 class UserSerializer(serializers.ModelSerializer):

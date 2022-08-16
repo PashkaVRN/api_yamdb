@@ -80,7 +80,7 @@ class UserViewSet(ModelViewSet):
     """
     queryset = User.objects.all()
     serializer_class = UserSerializer
-    permission_classes = [IsAuthenticated, IsAdmin]
+    permission_classes = [IsAdmin]
     lookup_field = 'username'
     filter_backends = [SearchFilter]
     search_fields = ('username',)
@@ -152,7 +152,7 @@ class GenreViewSet(MixinSet):
 class TitleViewSet(viewsets.ModelViewSet):
     """Класс произведения, доступно только админу."""
     queryset = Title.objects.annotate(
-        rating=Avg('review__score')).all()
+        rating=Avg('review__score')).all().order_by('-name')
     serializer_class = TitleCreateSerializer
     permission_classes = (IsAdminOrReadOnly,)
     filterset_class = TitleFilter

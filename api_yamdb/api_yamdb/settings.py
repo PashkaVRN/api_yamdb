@@ -1,23 +1,19 @@
 import os
 from datetime import timedelta
 
-# Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
-# SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = 'p&l%385148kslhtyn^##a1)ilz@4zqj=rq&agdol^##zgl9(vs'
 
-# SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
 ALLOWED_HOSTS = ['*']
 
 
-# Application definition
-
 INSTALLED_APPS = [
     'api.apps.ApiConfig',
     'users.apps.UsersConfig',
+    'reviews.apps.ReviewsConfig',
     'rest_framework_simplejwt',
     'rest_framework',
     'django.contrib.admin',
@@ -27,7 +23,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'django_filters',
-    'reviews'
+    'reviews',
 ]
 
 MIDDLEWARE = [
@@ -62,8 +58,6 @@ TEMPLATES = [
 WSGI_APPLICATION = 'api_yamdb.wsgi.application'
 
 
-# Database
-
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
@@ -71,8 +65,6 @@ DATABASES = {
     }
 }
 
-
-# Password validation
 
 AUTH_PASSWORD_VALIDATORS = [
     {
@@ -90,9 +82,7 @@ AUTH_PASSWORD_VALIDATORS = [
 ]
 
 
-# Internationalization
-
-LANGUAGE_CODE = 'en-us'
+LANGUAGE_CODE = 'ru-RU'
 
 TIME_ZONE = 'UTC'
 
@@ -102,8 +92,6 @@ USE_L10N = True
 
 USE_TZ = True
 
-
-# Static files (CSS, JavaScript, Images)
 
 STATIC_URL = '/static/'
 
@@ -115,12 +103,17 @@ EMAIL_BACKEND = 'django.core.mail.backends.filebased.EmailBackend'
 
 EMAIL_FILE_PATH = os.path.join(BASE_DIR, 'sent_emails')
 
+DEFAULT_FROM_EMAIL = 'Vova353@mail.com'
+
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework_simplejwt.authentication.JWTAuthentication',
     ),
     'DEFAULT_PERMISSION_CLASSES': [
-        'rest_framework.permissions.IsAuthenticatedOrReadOnly',
+        'rest_framework.permissions.AllowAny',
+    ],
+    'DEFAULT_FILTER_BACKENDS': [
+        'django_filters.rest_framework.DjangoFilterBackend',
     ],
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.LimitOffsetPagination',
     'PAGE_SIZE': 10
@@ -130,3 +123,9 @@ SIMPLE_JWT = {
     'ACCESS_TOKEN_LIFETIME': timedelta(days=1),
     'AUTH_HEADER_TYPES': ('Bearer',),
 }
+
+USERNAME_MAX_LENGTH = 150
+EMAIL_MAX_LENGTH = 254
+CONFIRMATION_CODE_MAX_LENGTH = 100
+CONFIRMATION_CODE_MIN_VALUE = 100000
+CONFIRMATION_CODE_MAX_VALUE = 999999

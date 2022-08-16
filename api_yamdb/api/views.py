@@ -6,7 +6,7 @@ from django.views.decorators.csrf import csrf_exempt
 from rest_framework import viewsets
 from rest_framework.decorators import action
 from rest_framework.filters import SearchFilter
-from rest_framework.permissions import AllowAny, IsAuthenticated
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.pagination import LimitOffsetPagination
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
@@ -108,7 +108,7 @@ class ReviewViewSet(viewsets.ModelViewSet):
     """Просмотр и редактирование рецензий."""
     serializer_class = ReviewSerializer
     pagination_class = LimitOffsetPagination
-    permission_classes = [IsModeratorAdminOrReadOnly, ]
+    permission_classes = [IsAuthorModeratorAdminOrReadOnly, ]
 
     def get_title(self):
         return get_object_or_404(Title, pk=self.kwargs.get('title_id'))
@@ -125,7 +125,7 @@ class CommentViewSet(viewsets.ModelViewSet):
     queryset = Comment.objects.all()
     serializer_class = CommentSerializer
     pagination_class = LimitOffsetPagination
-    permission_classes = [IsModeratorAdminOrReadOnly, ]
+    permission_classes = [IsAuthorModeratorAdminOrReadOnly, ]
 
     def get_review(self):
         return get_object_or_404(Review, id=self.kwargs.get('review_id'))

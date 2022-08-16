@@ -40,7 +40,7 @@ class User(AbstractUser):
         help_text='Кратко опишите свою биографию'
     )
     role = CharField(
-        max_length=max((len(item) for item in ROLE_CHOICES)),
+        max_length=max((len(item) for item in ROLE_CHOICES[1])),
         choices=ROLE_CHOICES,
         default=USER_ROLE,
         verbose_name='Пользовательская роль',

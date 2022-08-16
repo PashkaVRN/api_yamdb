@@ -128,7 +128,8 @@ class SignUpSerializer(serializers.Serializer):
                 queryset=User.objects.all(),
                 message=('Имя уже используется')
             ),
-            username_validation]
+            username_validation
+        ]
     )
     email = serializers.EmailField(
         required=True,
@@ -160,7 +161,8 @@ class GetJWTTokenSerializer(serializers.Serializer):
                 queryset=User.objects.all(),
                 message=('Имя уже используется')
             ),
-            username_validation]
+            username_validation
+        ]
     )
     confirmation_code = serializers.CharField(
         max_length=CONFIRMATION_CODE_MAX_LENGTH,

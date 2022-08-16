@@ -18,6 +18,7 @@ ALLOWED_HOSTS = ['*']
 INSTALLED_APPS = [
     'api.apps.ApiConfig',
     'users.apps.UsersConfig',
+    'reviews.apps.ReviewsConfig',
     'rest_framework_simplejwt',
     'rest_framework',
     'django.contrib.admin',
@@ -27,7 +28,6 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'django_filters',
-    'reviews',
 ]
 
 MIDDLEWARE = [

@@ -13,6 +13,7 @@ ALLOWED_HOSTS = ['*']
 INSTALLED_APPS = [
     'api.apps.ApiConfig',
     'users.apps.UsersConfig',
+    'reviews.apps.ReviewsConfig',
     'rest_framework_simplejwt',
     'rest_framework',
     'django.contrib.admin',
@@ -102,12 +103,14 @@ EMAIL_BACKEND = 'django.core.mail.backends.filebased.EmailBackend'
 
 EMAIL_FILE_PATH = os.path.join(BASE_DIR, 'sent_emails')
 
+DEFAULT_FROM_EMAIL = 'Vova353@mail.com'
+
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework_simplejwt.authentication.JWTAuthentication',
     ),
     'DEFAULT_PERMISSION_CLASSES': [
-        'rest_framework.permissions.IsAuthenticatedOrReadOnly',
+        'rest_framework.permissions.AllowAny',
     ],
     'DEFAULT_FILTER_BACKENDS': [
         'django_filters.rest_framework.DjangoFilterBackend',
@@ -120,3 +123,9 @@ SIMPLE_JWT = {
     'ACCESS_TOKEN_LIFETIME': timedelta(days=1),
     'AUTH_HEADER_TYPES': ('Bearer',),
 }
+
+USERNAME_MAX_LENGTH = 150
+EMAIL_MAX_LENGTH = 254
+CONFIRMATION_CODE_MAX_LENGTH = 100
+CONFIRMATION_CODE_MIN_VALUE = 100000
+CONFIRMATION_CODE_MAX_VALUE = 999999

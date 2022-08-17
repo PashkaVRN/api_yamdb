@@ -1,8 +1,6 @@
+from django.conf import settings
 from django.contrib.auth.models import AbstractUser
 from django.db.models import CharField, EmailField, TextField
-
-from api_yamdb.settings import (CONFIRMATION_CODE_MAX_LENGTH, EMAIL_MAX_LENGTH,
-                                USERNAME_MAX_LENGTH)
 
 from .validators import username_validation
 
@@ -24,14 +22,14 @@ class User(AbstractUser):
     )
     username = CharField(
         unique=True,
-        max_length=USERNAME_MAX_LENGTH,
+        max_length=settings.USERNAME_MAX_LENGTH,
         validators=(username_validation,),
         verbose_name='Имя пользователя',
         help_text='Введите имя пользователя'
     )
     email = EmailField(
         unique=True,
-        max_length=EMAIL_MAX_LENGTH,
+        max_length=settings.EMAIL_MAX_LENGTH,
         verbose_name='Адрес электронной почты',
         help_text='Введите адрес электронной почты')
     bio = TextField(
@@ -40,14 +38,14 @@ class User(AbstractUser):
         help_text='Кратко опишите свою биографию'
     )
     role = CharField(
-        max_length=max((len(item) for item in ROLE_CHOICES[1])),
+        max_length=max((len(item) for _, item in ROLE_CHOICES)),
         choices=ROLE_CHOICES,
         default=USER_ROLE,
         verbose_name='Пользовательская роль',
         help_text='Выберите роль пользователя'
     )
     confirmation_code = CharField(
-        max_length=CONFIRMATION_CODE_MAX_LENGTH,
+        max_length=settings.CONFIRMATION_CODE_MAX_LENGTH,
         blank=True
     )
 

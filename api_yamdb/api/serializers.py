@@ -95,6 +95,7 @@ class CustomGenre(serializers.SlugRelatedField):
 
 
 class ReviewSerializer(serializers.ModelSerializer):
+    """Сериализатор модели User."""
     title = serializers.SlugRelatedField(
         slug_field='name',
         read_only=True,
@@ -116,6 +117,9 @@ class ReviewSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
     def validate(self, data):
+        # !=GET не пускает пайтест
+        if self.context['request'].method != 'POST':
+            return data
         title_id = self.context.get('view').kwargs.get('title_id')
         title = get_object_or_404(Title, pk=title_id)
         request = self.context['request']

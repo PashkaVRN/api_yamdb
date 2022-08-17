@@ -13,6 +13,7 @@ ALLOWED_HOSTS = ['*']
 INSTALLED_APPS = [
     'api.apps.ApiConfig',
     'users.apps.UsersConfig',
+    'core',
     'reviews.apps.ReviewsConfig',
     'rest_framework_simplejwt',
     'rest_framework',
@@ -128,3 +129,4 @@ EMAIL_MAX_LENGTH = 254
 CONFIRMATION_CODE_MAX_LENGTH = 100
 CONFIRMATION_CODE_MIN_VALUE = 100000
 CONFIRMATION_CODE_MAX_VALUE = 999999
+LONG = 30

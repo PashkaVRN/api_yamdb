@@ -7,7 +7,6 @@ from rest_framework import viewsets
 from rest_framework.decorators import action
 from rest_framework.filters import SearchFilter
 from rest_framework.permissions import IsAuthenticated
-from rest_framework.pagination import LimitOffsetPagination
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.status import HTTP_200_OK, HTTP_400_BAD_REQUEST
@@ -107,7 +106,6 @@ class UserViewSet(ModelViewSet):
 class ReviewViewSet(viewsets.ModelViewSet):
     """Просмотр и редактирование рецензий."""
     serializer_class = ReviewSerializer
-    pagination_class = LimitOffsetPagination
     permission_classes = [IsAuthorModeratorAdminOrReadOnly, ]
 
     def get_title(self):
@@ -124,7 +122,6 @@ class CommentViewSet(viewsets.ModelViewSet):
     """Просмотр и редактирование комментариев."""
     queryset = Comment.objects.all()
     serializer_class = CommentSerializer
-    pagination_class = LimitOffsetPagination
     permission_classes = [IsAuthorModeratorAdminOrReadOnly, ]
 
     def get_review(self):

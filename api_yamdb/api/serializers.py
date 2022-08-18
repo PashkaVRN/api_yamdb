@@ -5,9 +5,8 @@ from django.contrib.auth import get_user_model
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.shortcuts import get_object_or_404
 from rest_framework import serializers
-from rest_framework.validators import UniqueValidator
-from reviews.models import Category, Comment, Genre, Review, Title
 
+from reviews.models import Category, Comment, Genre, Review, Title
 from users.validators import username_validation
 
 User = get_user_model()
@@ -135,22 +134,12 @@ class SignUpSerializer(serializers.Serializer):
         max_length=settings.USERNAME_MAX_LENGTH,
         required=True,
         validators=[
-            UniqueValidator(
-                queryset=User.objects.all(),
-                message=('Имя уже используется')
-            ),
-            username_validation
+            username_validation,
         ]
     )
     email = serializers.EmailField(
         required=True,
-        max_length=settings.EMAIL_MAX_LENGTH,
-        validators=[
-            UniqueValidator(
-                queryset=User.objects.all(),
-                message=('Email уже используется')
-            )
-        ]
+        max_length=settings.EMAIL_MAX_LENGTH
     )
 
 

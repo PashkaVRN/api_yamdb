@@ -15,10 +15,15 @@ class CommentAdmin(admin.ModelAdmin):
     list_filter = ('pub_date', 'author', )
 
 
+class GenreTitleInline(admin.TabularInline):
+    model = Title.genre.through
+
+
 class TitleAdmin(admin.ModelAdmin):
-    list_display = ('name', 'year', 'description', 'get_genre', 'category', )
+    list_display = ('name', 'year', 'description', 'category', )
     search_fields = ('name', )
     list_filter = ('id', )
+    inlines = [GenreTitleInline]
 
 
 class GenreAdmin(admin.ModelAdmin):
@@ -35,6 +40,6 @@ class CategoryAdmin(admin.ModelAdmin):
 
 admin.site.register(Review, ReviewAdmin)
 admin.site.register(Comment, CommentAdmin)
-admin.site.register(Title)
-admin.site.register(Genre)
-admin.site.register(Category)
+admin.site.register(Title, TitleAdmin)
+admin.site.register(Genre, GenreAdmin)
+admin.site.register(Category, CategoryAdmin)

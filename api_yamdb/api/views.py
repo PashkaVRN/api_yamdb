@@ -13,8 +13,8 @@ from rest_framework.status import HTTP_200_OK, HTTP_400_BAD_REQUEST
 from rest_framework.views import APIView
 from rest_framework.viewsets import ModelViewSet
 from rest_framework_simplejwt.tokens import RefreshToken
-from reviews.models import Category, Comment, Genre, Review, Title
 
+from reviews.models import Category, Comment, Genre, Review, Title
 from .filters import TitleFilter
 from .mixins import MixinSet
 from .permissions import (IsAdmin, IsAdminOrReadOnly,
@@ -38,7 +38,7 @@ class SignUpView(APIView):
     def post(self, request):
         serializer = SignUpSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        username = serializer.validated_data.get('username'),
+        username = serializer.validated_data.get('username')
         email = serializer.validated_data.get('email')
         try:
             user, _ = User.objects.get_or_create(
@@ -75,7 +75,8 @@ class GetJWTTokenView(APIView):
                     "confirmation_code": ("Неверный код доступа "
                                           f"{confirmation_code}")
                 },
-                status=HTTP_400_BAD_REQUEST)
+                status=HTTP_400_BAD_REQUEST
+            )
         return Response(
             {
                 "token": str(

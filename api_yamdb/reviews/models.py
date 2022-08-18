@@ -1,4 +1,4 @@
-from core.models import CreatedModel
+from core.models import CommentReviews
 from django.contrib.auth import get_user_model
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
@@ -81,13 +81,7 @@ class Title(models.Model):
         return self.name
 
 
-class Review(CreatedModel):
-    author = models.ForeignKey(
-        User,
-        on_delete=models.CASCADE,
-        related_name='reviews',
-        verbose_name='Автор'
-    )
+class Review(CommentReviews):
     score = models.PositiveSmallIntegerField(
         verbose_name='Оценка произведения',
         default=1,
@@ -98,11 +92,11 @@ class Review(CreatedModel):
     )
     title = models.ForeignKey(
         Title, on_delete=models.CASCADE,
-        related_name='review',
         verbose_name='Название',
     )
 
-    class Meta():
+    class Meta(CommentReviews.Meta):
+        default_related_name = 'review'
         constraints = [
             models.UniqueConstraint(
                 fields=['title', 'author'],
@@ -110,28 +104,13 @@ class Review(CreatedModel):
             ),
         ]
 
-    def __str__(self):
-        return self.text
 
-
-class Comment(CreatedModel):
-    author = models.ForeignKey(
-        User,
-        on_delete=models.CASCADE,
-        related_name='comments',
-        verbose_name='Автор'
-    )
+class Comment(CommentReviews):
     review = models.ForeignKey(
         Review,
         on_delete=models.CASCADE,
-        related_name='comments',
         verbose_name='Обзор',
     )
-    created = models.DateTimeField(
-        'Дата комментария', auto_now_add=True,)
 
-    class Meta:
-        ordering = ('-pub_date',)
-
-    def __str__(self):
-        return self.text
+    class Meta(CommentReviews.Meta):
+        default_related_name = 'comments'

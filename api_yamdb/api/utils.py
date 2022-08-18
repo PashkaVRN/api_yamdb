@@ -1,15 +1,15 @@
 from random import randint
 
+from django.conf import settings
 from django.core.mail import send_mail
-
-from api_yamdb.settings import (CONFIRMATION_CODE_MAX_VALUE,
-                                CONFIRMATION_CODE_MIN_VALUE,
-                                DEFAULT_FROM_EMAIL)
 
 
 def get_confirmation_code():
     """Генерирует 6-тизначный код."""
-    return randint(CONFIRMATION_CODE_MIN_VALUE, CONFIRMATION_CODE_MAX_VALUE)
+    return randint(
+        settings.CONFIRMATION_CODE_MIN_VALUE,
+        settings.CONFIRMATION_CODE_MAX_VALUE
+    )
 
 
 def send_confirmation_code(user):
@@ -26,6 +26,6 @@ def send_confirmation_code(user):
             f'кодом подтверждения {user.confirmation_code} '
             'на эндпойнт /api/v1/auth/token/.'
         ),
-        from_email=DEFAULT_FROM_EMAIL,
+        from_email=settings.DEFAULT_FROM_EMAIL,
         recipient_list=[user.email]
     )

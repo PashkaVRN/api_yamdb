@@ -1,3 +1,4 @@
+from django.db import IntegrityError
 from django.db.models import Avg
 from django.shortcuts import get_object_or_404
 from django.utils.decorators import method_decorator
@@ -7,6 +8,7 @@ from rest_framework.decorators import action
 from rest_framework.filters import SearchFilter
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
+from rest_framework.serializers import ValidationError
 from rest_framework.status import HTTP_200_OK, HTTP_400_BAD_REQUEST
 from rest_framework.views import APIView
 from rest_framework.viewsets import ModelViewSet
@@ -36,15 +38,18 @@ class SignUpView(APIView):
     def post(self, request):
         serializer = SignUpSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
+        username = serializer.validated_data.get('username'),
+        email = serializer.validated_data.get('email')
         try:
-            user = User.objects.get_or_create(
-                username=serializer.validated_data.get('username'),
-                email=serializer.validated_data.get('email')
-            )[0]
-        except Exception as error:
-            return Response(
-                {"message": error.args[0]},
-                status=HTTP_400_BAD_REQUEST)
+            user, _ = User.objects.get_or_create(
+                username=username,
+                email=email
+            )
+        except IntegrityError as error:
+            raise ValidationError(
+                ('Ошибка при попытке создать новую запись '
+                 f'в базе с username={username}, email={email}')
+            ) from error
         user.confirmation_code = str(get_confirmation_code())
         user.save()
         send_confirmation_code(user)
@@ -158,13 +163,12 @@ class GenreViewSet(MixinSet):
 class TitleViewSet(viewsets.ModelViewSet):
     """Класс произведения, доступно только админу."""
     queryset = Title.objects.annotate(
-        rating=Avg('review__score')).all().order_by('-name')
+        rating=Avg('review__score')).all()
     serializer_class = TitleCreateSerializer
     permission_classes = (IsAdminOrReadOnly,)
     filterset_class = TitleFilter
     filterset_fields = ['name']
     ordering_fields = ('name',)
-    ordering = ('name',)
 
     def get_serializer_class(self):
         if self.action in ['list', 'retrieve']:

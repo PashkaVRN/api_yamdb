@@ -1,14 +1,12 @@
 import datetime as dt
 
+from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.shortcuts import get_object_or_404
 from rest_framework import serializers
 from rest_framework.validators import UniqueValidator
 from reviews.models import Category, Comment, Genre, Review, Title
-
-from api_yamdb.settings import (CONFIRMATION_CODE_MAX_LENGTH, EMAIL_MAX_LENGTH,
-                                USERNAME_MAX_LENGTH)
 
 from users.validators import username_validation
 
@@ -87,6 +85,7 @@ class TitleCreateSerializer(serializers.ModelSerializer):
 
 
 class ReviewSerializer(serializers.ModelSerializer):
+    """Сериализатор модели User."""
     title = serializers.SlugRelatedField(
         slug_field='name',
         read_only=True,
@@ -108,14 +107,14 @@ class ReviewSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
     def validate(self, data):
-        title_id = self.context.get('view').kwargs.get('title_id')
-        title = get_object_or_404(Title, pk=title_id)
-        request = self.context['request']
-        author = request.user
-        if (request.method == 'POST'
-           and Review.objects.filter(title=title, author=author).exists()):
-            raise serializers.ValidationError('Вы уже оставили свой отзыв'
-                                              'к этому произведению!')
+        if self.context['request'].method == 'POST':
+            title_id = self.context.get('view').kwargs.get('title_id')
+            title = get_object_or_404(Title, id=title_id)
+            request = self.context['request']
+            author = request.user
+            if Review.objects.filter(title=title, author=author).exists():
+                raise serializers.ValidationError('Вы уже оставили свой отзыв'
+                                                  'к этому произведению!')
         return data
 
 
@@ -134,7 +133,7 @@ class UserSerializer(serializers.ModelSerializer):
 class SignUpSerializer(serializers.Serializer):
     """Сериализатор запроса регистрации нового пользователя."""
     username = serializers.CharField(
-        max_length=USERNAME_MAX_LENGTH,
+        max_length=settings.USERNAME_MAX_LENGTH,
         required=True,
         validators=[
             UniqueValidator(
@@ -146,7 +145,7 @@ class SignUpSerializer(serializers.Serializer):
     )
     email = serializers.EmailField(
         required=True,
-        max_length=EMAIL_MAX_LENGTH,
+        max_length=settings.EMAIL_MAX_LENGTH,
         validators=[
             UniqueValidator(
                 queryset=User.objects.all(),
@@ -167,17 +166,13 @@ class UserRestrictedSerializer(UserSerializer):
 class GetJWTTokenSerializer(serializers.Serializer):
     """Сериализатор запроса JWT токена."""
     username = serializers.CharField(
-        max_length=USERNAME_MAX_LENGTH,
+        max_length=settings.USERNAME_MAX_LENGTH,
         required=True,
         validators=[
-            UniqueValidator(
-                queryset=User.objects.all(),
-                message=('Имя уже используется')
-            ),
             username_validation
         ]
     )
     confirmation_code = serializers.CharField(
-        max_length=CONFIRMATION_CODE_MAX_LENGTH,
+        max_length=settings.CONFIRMATION_CODE_MAX_LENGTH,
         required=True
     )

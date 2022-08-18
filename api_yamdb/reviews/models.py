@@ -1,8 +1,8 @@
-from core.models import CommentReviews, Common
 from django.contrib.auth import get_user_model
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 
+from core.models import CommentReviews, Common
 from .validator import year_validate
 
 User = get_user_model()
@@ -50,13 +50,14 @@ class Title(models.Model):
         db_index=True
     )
     description = models.CharField(
-        'Описание',
         max_length=200,
         null=True,
         blank=True
     )
 
     class Meta:
+        verbose_name = 'Произведение'
+        verbose_name_plural = 'Произведения'
         ordering = ('-name',)
 
     def __str__(self):
@@ -78,6 +79,8 @@ class Review(CommentReviews):
     )
 
     class Meta(CommentReviews.Meta):
+        verbose_name = 'Обзор'
+        verbose_name_plural = 'Обзоры'
         default_related_name = 'review'
         constraints = [
             models.UniqueConstraint(
@@ -96,3 +99,5 @@ class Comment(CommentReviews):
 
     class Meta(CommentReviews.Meta):
         default_related_name = 'comments'
+        verbose_name = 'Комментарий'
+        verbose_name_plural = 'Комментарии'

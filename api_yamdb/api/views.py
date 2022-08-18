@@ -2,11 +2,9 @@ from django.db.models import Avg
 from django.shortcuts import get_object_or_404
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_exempt
-
 from rest_framework import viewsets
 from rest_framework.decorators import action
 from rest_framework.filters import SearchFilter
-from rest_framework.permissions import IsAuthenticated
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.status import HTTP_200_OK, HTTP_400_BAD_REQUEST
@@ -15,7 +13,6 @@ from rest_framework.viewsets import ModelViewSet
 from rest_framework_simplejwt.tokens import RefreshToken
 from reviews.models import Category, Comment, Genre, Review, Title
 
-from users.models import User
 from .filters import TitleFilter
 from .mixins import MixinSet
 from .permissions import (IsAdmin, IsAdminOrReadOnly,
@@ -26,6 +23,7 @@ from .serializers import (CategorySerializer, CommentSerializer,
                           TitleCreateSerializer, TitleListSerializer,
                           UserRestrictedSerializer, UserSerializer)
 from .utils import get_confirmation_code, send_confirmation_code
+from users.models import User
 
 
 class SignUpView(APIView):
@@ -37,15 +35,20 @@ class SignUpView(APIView):
 
     def post(self, request):
         serializer = SignUpSerializer(data=request.data)
-        username = serializer.initial_data.get('username')
-        email = serializer.initial_data.get('email')
-        if not User.objects.filter(username=username, email=email).exists():
-            serializer.is_valid(raise_exception=True)
-        user = User.objects.get_or_create(username=username, email=email)[0]
-        user.confirmation_code = get_confirmation_code()
+        serializer.is_valid(raise_exception=True)
+        try:
+            user = User.objects.get_or_create(
+               username=serializer.validated_data.get('username'),
+               email=serializer.validated_data.get('email')
+            )[0]
+        except Exception as error:
+            return Response(
+                {"message": error.args[0]},
+                status=HTTP_400_BAD_REQUEST)
+        user.confirmation_code = str(get_confirmation_code())
         user.save()
         send_confirmation_code(user)
-        return Response(serializer.initial_data, status=HTTP_200_OK)
+        return Response(serializer.validated_data, status=HTTP_200_OK)
 
 
 @method_decorator(csrf_exempt, name='dispatch')
@@ -57,11 +60,17 @@ class GetJWTTokenView(APIView):
 
     def post(self, request):
         serializer = GetJWTTokenSerializer(data=request.data)
-        username = serializer.initial_data.get('username')
         serializer.is_valid(raise_exception=True)
+        username = serializer.validated_data.get('username')
+        confirmation_code = serializer.validated_data['confirmation_code']
         user = get_object_or_404(User, username=username)
-        if user.confirmation_code != serializer.data['confirmation_code']:
-            return Response(serializer.errors, status=HTTP_400_BAD_REQUEST)
+        if user.confirmation_code != confirmation_code:
+            return Response(
+                {
+                    "confirmation_code": ("Неверный код доступа "
+                                          f"{confirmation_code}")
+                },
+                status=HTTP_400_BAD_REQUEST)
         return Response(
             {
                 "token": str(
@@ -149,7 +158,7 @@ class GenreViewSet(MixinSet):
 class TitleViewSet(viewsets.ModelViewSet):
     """Класс произведения, доступно только админу."""
     queryset = Title.objects.annotate(
-        rating=Avg('review__score')).all().order_by('-name')
+        rating=Avg('review__score')).all()
     serializer_class = TitleCreateSerializer
     permission_classes = (IsAdminOrReadOnly,)
     filterset_class = TitleFilter

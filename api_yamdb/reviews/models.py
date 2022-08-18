@@ -1,4 +1,4 @@
-from core.models import CommentReviews
+from core.models import CommentReviews, Common
 from django.contrib.auth import get_user_model
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
@@ -6,24 +6,6 @@ from django.db import models
 from .validator import year_validate
 
 User = get_user_model()
-
-
-class Common(models.Model):
-    name = models.TextField(
-        max_length=100
-    )
-    slug = models.SlugField(
-        'slug',
-        unique=True,
-        db_index=True
-    )
-
-    class Meta:
-        abstract = True
-        ordering = ('name',)
-
-    def __str__(self):
-        return self.name
 
 
 class Category(Common):
@@ -50,7 +32,7 @@ class Title(models.Model):
         'Название',
         max_length=100,
         db_index=True)
-    year = models.IntegerField(
+    year = models.PositiveSmallIntegerField(
         'Год',
         blank=True,
         db_index=True,

@@ -38,8 +38,8 @@ class SignUpView(APIView):
         serializer.is_valid(raise_exception=True)
         try:
             user = User.objects.get_or_create(
-               username=serializer.validated_data.get('username'),
-               email=serializer.validated_data.get('email')
+                username=serializer.validated_data.get('username'),
+                email=serializer.validated_data.get('email')
             )[0]
         except Exception as error:
             return Response(

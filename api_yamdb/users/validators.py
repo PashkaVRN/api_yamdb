@@ -10,7 +10,7 @@ def username_validation(value):
     """
     if value == 'me':
         raise ValidationError('Нельзя использовать "me" как имя пользователя')
-    checked_value = re.match('^[\w.@+-]+', value)
+    checked_value = re.match('^[\\w.@+-]+', value)
     if checked_value is None or checked_value.group() != value:
         forbidden_simbol = value[0] if (
             checked_value is None

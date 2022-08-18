@@ -1,6 +1,7 @@
 from django.contrib.auth import get_user_model
 from django.db import models
-from api_yamdb.settings import (LONG)
+
+from api_yamdb.settings import LONG
 
 User = get_user_model()
 

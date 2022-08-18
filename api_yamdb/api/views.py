@@ -158,13 +158,12 @@ class GenreViewSet(MixinSet):
 class TitleViewSet(viewsets.ModelViewSet):
     """Класс произведения, доступно только админу."""
     queryset = Title.objects.annotate(
-        rating=Avg('review__score')).all().order_by('-name')
+        rating=Avg('review__score')).all()
     serializer_class = TitleCreateSerializer
     permission_classes = (IsAdminOrReadOnly,)
     filterset_class = TitleFilter
     filterset_fields = ['name']
     ordering_fields = ('name',)
-    ordering = ('name',)
 
     def get_serializer_class(self):
         if self.action in ['list', 'retrieve']:

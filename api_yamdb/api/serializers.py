@@ -79,16 +79,8 @@ class TitleCreateSerializer(serializers.ModelSerializer):
             )
         return value
 
-
-class CustomCategory(serializers.SlugRelatedField):
-    def to_representation(self, value):
-        serializer = CategorySerializer(value)
-        return serializer.data
-
-
-class CustomGenre(serializers.SlugRelatedField):
-    def to_representation(self, value):
-        serializer = GenreSerializer(value)
+    def to_representation(self, instance):
+        serializer = TitleListSerializer(instance)
         return serializer.data
 
 

@@ -22,6 +22,26 @@ class CommentReviews(models.Model):
     class Meta():
         abstract = True
         ordering = ('-pub_date',)
-
+        
     def __str__(self):
         return self.text[LONG]
+
+
+class Common(models.Model):
+    name = models.TextField(
+        verbose_name='Наименование',
+        max_length=100
+    )
+    slug = models.SlugField(
+        'slug',
+        unique=True,
+        db_index=True
+    )
+
+    class Meta:
+        abstract = True
+        ordering = ('name',)
+
+    def __str__(self):
+        return self.name
+

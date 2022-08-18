@@ -80,8 +80,7 @@ class TitleCreateSerializer(serializers.ModelSerializer):
         return value
 
     def to_representation(self, instance):
-        serializer = TitleListSerializer(instance)
-        return serializer.data
+        return TitleListSerializer(instance, context=self.context).data
 
 
 class ReviewSerializer(serializers.ModelSerializer):
